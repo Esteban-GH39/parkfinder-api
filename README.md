@@ -2,5 +2,5 @@
 Backend and REST API for the ParkFinder system—designed for managing parking facilities, reservations, users, payments, and notifications—using a microservices-based architecture.
 
 
-# ParkFinder API (Backtend)
+# ParkFinder API (Backend)
 Frontend: https://github.com/Esteban-GH39/parkfinder-app
