@@ -44,6 +44,5 @@ nb-configuration.xml
 # TLS Certificates
 .certs/
 
-
 # logs
 logs/
