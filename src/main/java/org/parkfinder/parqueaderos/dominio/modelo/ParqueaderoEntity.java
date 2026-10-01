@@ -17,9 +17,11 @@ import java.time.LocalTime;
 public class ParqueaderoEntity extends PanacheEntity {
     public String nombre;
     public String direccion;
-    public String ubicacion;
+    public String zona;
     public int capacidadTotal;
-    public Double tarifa;
+    public Double tarifaHora;
+    public Double tarifaDia;
+    public Double tarifaNoche;
     public LocalTime horaInicio;
     public LocalTime horaFin;
     public  String nombrePropietario;
