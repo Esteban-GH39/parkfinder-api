@@ -53,12 +53,16 @@ public class ParqueaderoPanache implements ParqueaderoRepositorio, PanacheReposi
                 valor -> entidad.nombre = valor);
         registrar(cambios, id, "direccion", entidad.direccion, datos.direccion,
                 valor -> entidad.direccion = valor);
-        registrar(cambios, id, "ubicacion", entidad.ubicacion, datos.ubicacion,
-                valor -> entidad.ubicacion = valor);
+        registrar(cambios, id, "zona", entidad.zona, datos.zona,
+                valor -> entidad.zona = valor);
         registrar(cambios, id, "capacidadTotal", entidad.capacidadTotal, datos.capacidadTotal,
                 valor -> entidad.capacidadTotal = valor);
-        registrar(cambios, id, "tarifa", entidad.tarifa, datos.tarifa,
-                valor -> entidad.tarifa = valor);
+        registrar(cambios, id, "tarifaHora", entidad.tarifaHora, datos.tarifaHora,
+                valor -> entidad.tarifaHora = valor);
+        registrar(cambios, id, "tarifaDia", entidad.tarifaDia, datos.tarifaDia,
+                valor -> entidad.tarifaDia = valor);
+        registrar(cambios, id, "tarifaNoche", entidad.tarifaNoche, datos.tarifaNoche,
+                valor -> entidad.tarifaNoche = valor);
         registrar(cambios, id, "horaInicio", entidad.horaInicio, datos.horaInicio,
                 valor -> entidad.horaInicio = valor);
         registrar(cambios, id, "horaFin", entidad.horaFin, datos.horaFin,

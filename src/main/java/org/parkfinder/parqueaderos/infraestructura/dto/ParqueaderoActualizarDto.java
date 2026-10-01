@@ -15,11 +15,15 @@ import java.time.LocalTime;
 public record ParqueaderoActualizarDto(
         String nombre,
         String direccion,
-        String ubicacion,
+        String zona,
         @Min(value = 0, message = "La capacidad no puede ser negativa")
-        Integer capacidad,
-        @PositiveOrZero(message = "La tarifa no puede ser negativa")
-        Double tarifa,
+        Integer capacidadTotal,
+        @PositiveOrZero(message = "La tarifa por hora no puede ser negativa")
+        Double tarifaHora,
+        @PositiveOrZero(message = "La tarifa por día no puede ser negativa")
+        Double tarifaDia,
+        @PositiveOrZero(message = "La tarifa por noche no puede ser negativa")
+        Double tarifaNoche,
         LocalTime horaInicio,
         LocalTime horaFinal,
         String nombrePropietario
