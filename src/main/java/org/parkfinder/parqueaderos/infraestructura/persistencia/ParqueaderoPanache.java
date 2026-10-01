@@ -8,6 +8,7 @@ import org.parkfinder.parqueaderos.dominio.modelo.HistorialCambio;
 import org.parkfinder.parqueaderos.dominio.modelo.HistorialCambioEntity;
 import org.parkfinder.parqueaderos.dominio.modelo.Parqueadero;
 import org.parkfinder.parqueaderos.dominio.modelo.ParqueaderoActualizacion;
+import org.parkfinder.parqueaderos.dominio.modelo.ParqueaderoConsulta;
 import org.parkfinder.parqueaderos.dominio.modelo.ParqueaderoEntity;
 import org.parkfinder.parqueaderos.dominio.repositorio.ParqueaderoRepositorio;
 
@@ -104,6 +105,39 @@ public class ParqueaderoPanache implements ParqueaderoRepositorio, PanacheReposi
                         .fecha(entidad.fecha)
                         .build())
                 .toList();
+    }
+
+    //MÉTODO PARA CONSULTAR UN PARQUEADERO (HU-19)
+    @Override
+    public ParqueaderoConsulta obtenerPorId(Long id) {
+        ParqueaderoEntity entidad = findById(id);
+        if (entidad == null) {
+            throw new ParqueaderoNoEncontradoException(id);
+        }
+        return aConsulta(entidad);
+    }
+
+    //MÉTODO PARA LISTAR PARQUEADEROS (HU-19)
+    @Override
+    public List<ParqueaderoConsulta> listar() {
+        return listAll().stream().map(this::aConsulta).toList();
+    }
+
+    private ParqueaderoConsulta aConsulta(ParqueaderoEntity entidad) {
+        return ParqueaderoConsulta
+                .builder()
+                .id(entidad.id)
+                .nombre(entidad.nombre)
+                .direccion(entidad.direccion)
+                .zona(entidad.zona)
+                .capacidadTotal(entidad.capacidadTotal)
+                .tarifaHora(entidad.tarifaHora)
+                .tarifaDia(entidad.tarifaDia)
+                .tarifaNoche(entidad.tarifaNoche)
+                .horaInicio(entidad.horaInicio)
+                .horaFin(entidad.horaFin)
+                .nombrePropietario(entidad.nombrePropietario)
+                .build();
     }
 
     /**

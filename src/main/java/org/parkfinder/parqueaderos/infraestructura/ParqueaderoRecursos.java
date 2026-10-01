@@ -19,6 +19,7 @@ import org.parkfinder.parqueaderos.dominio.modelo.HistorialCambio;
 import org.parkfinder.parqueaderos.dominio.modelo.Parqueadero;
 import org.parkfinder.parqueaderos.dominio.modelo.ParqueaderoActualizacion;
 import org.parkfinder.parqueaderos.infraestructura.dto.HistorialCambioDto;
+import org.parkfinder.parqueaderos.infraestructura.dto.ParqueaderoConsultaDto;
 import org.parkfinder.parqueaderos.infraestructura.dto.ParqueaderoActualizarDto;
 import org.parkfinder.parqueaderos.infraestructura.dto.ParqueaderoDto;
 
@@ -101,6 +102,40 @@ public class ParqueaderoRecursos {
 
         List<HistorialCambio> cambios = parqueaderoServicio.actualizarPark(id, datos);
         return Response.ok(cambios.stream().map(HistorialCambioDto::de).toList()).build();
+    }
+
+    @GET
+    @Operation(
+            summary = "Listar parqueaderos",
+            description = "Devuelve todos los parqueaderos registrados, sin filtros. " +
+                    "La búsqueda por zona, dirección o GPS corresponde a HU-03."
+    )
+    @APIResponse(
+            responseCode = "200",
+            description = "Lista de parqueaderos (vacía si no hay ninguno)"
+    )
+    public Response listar(){
+        return Response.ok(parqueaderoServicio.listar().stream()
+                .map(ParqueaderoConsultaDto::de).toList()).build();
+    }
+
+    @GET
+    @Path("/{id}")
+    @Operation(
+            summary = "Consultar un parqueadero",
+            description = "Devuelve los datos actuales de un parqueadero, para precargar " +
+                    "la pantalla de edición."
+    )
+    @APIResponse(
+            responseCode = "200",
+            description = "Parqueadero encontrado"
+    )
+    @APIResponse(
+            responseCode = "404",
+            description = "El parqueadero no existe"
+    )
+    public Response obtener(@PathParam("id") Long id){
+        return Response.ok(ParqueaderoConsultaDto.de(parqueaderoServicio.obtenerPorId(id))).build();
     }
 
     @GET
