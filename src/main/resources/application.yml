@@ -27,7 +27,7 @@ quarkus:
   hibernate-orm:
     schema-management:
       strategy:
-        drop-and-create
+        update
     log:
       sql: true
 
