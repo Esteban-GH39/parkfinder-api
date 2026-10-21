@@ -1,5 +1,6 @@
 package org.parkfinder.parqueaderos.infraestructura.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
@@ -7,8 +8,9 @@ import java.time.LocalTime;
 
 public record ParqueaderoDto(
 
-        @NotNull(message = "El id es requerido")
-        int idAdmin,
+
+        @NotNull(message = "El id del administrador es requerido")
+        int fk_parqueadero_admin,
         @NotBlank(message = "El nombre es requerido")
         String nombre,
         @NotBlank(message = "La dirección es requerida")
@@ -28,9 +30,8 @@ public record ParqueaderoDto(
         @NotNull(message = "La hora final es requerida")
         LocalTime horaFinal,
         @NotBlank(message = "El nombre del propietario o representante es requerido")
-        String nombrePropietario,
-        @NotNull(message = "Los cupos disponibles es requerido")
-        int cuposDisponibles
+        String nombrePropietario
+
 ) {
 
 

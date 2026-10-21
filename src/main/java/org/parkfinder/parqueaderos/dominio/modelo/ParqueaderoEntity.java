@@ -1,6 +1,7 @@
 package org.parkfinder.parqueaderos.dominio.modelo;
 
 import io.quarkus.hibernate.orm.panache.PanacheEntity;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -15,7 +16,8 @@ import java.time.LocalTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ParqueaderoEntity extends PanacheEntity {
-    public int idAdmin;
+    @Column(name = "fk_parqueadero_admin")
+    public int fk_parqueadero_admin;
     public String nombre;
     public String direccion;
     public String zona;

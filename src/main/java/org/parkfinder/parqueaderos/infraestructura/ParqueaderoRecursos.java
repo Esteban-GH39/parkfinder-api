@@ -40,6 +40,7 @@ public class ParqueaderoRecursos {
     public Response crearPark(@Valid ParqueaderoDto parqueaderoDto){
         Parqueadero parqueadero = Parqueadero
                 .builder()
+                .fk_parqueadero_admin(parqueaderoDto.fk_parqueadero_admin())
                 .nombre(parqueaderoDto.nombre())
                 .direccion(parqueaderoDto.direccion())
                 .zona(parqueaderoDto.zona())
@@ -50,7 +51,7 @@ public class ParqueaderoRecursos {
                 .horaInicio(parqueaderoDto.horaInicio())
                 .horaFin(parqueaderoDto.horaFinal())
                 .nombrePropietario(parqueaderoDto.nombrePropietario())
-                .cuposDisponibles(parqueaderoDto.cuposDisponibles())
+                .cuposDisponibles(parqueaderoDto.capacidadTotal())
                 .build();
         parqueaderoServicio.crearPark(parqueadero);
         return Response.status(Response.Status.CREATED).build();

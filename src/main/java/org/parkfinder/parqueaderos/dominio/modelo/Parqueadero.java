@@ -6,7 +6,7 @@ import java.time.LocalTime;
 
 @Builder
 public class Parqueadero {
-    public int idAdmin;
+    public int fk_parqueadero_admin;
     public String nombre;
     public String direccion;
     public String zona;

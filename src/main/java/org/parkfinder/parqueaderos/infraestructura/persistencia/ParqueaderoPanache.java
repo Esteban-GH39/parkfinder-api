@@ -17,7 +17,7 @@ public class ParqueaderoPanache implements ParqueaderoRepositorio, PanacheReposi
     public void crearPark(Parqueadero parqueadero){
         ParqueaderoEntity parqueaderoEntity = ParqueaderoEntity
                 .builder()
-                .idAdmin(parqueadero.idAdmin)
+                .fk_parqueadero_admin(parqueadero.fk_parqueadero_admin)
                 .nombre(parqueadero.nombre)
                 .direccion(parqueadero.direccion)
                 .zona(parqueadero.zona)
