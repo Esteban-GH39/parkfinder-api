@@ -50,6 +50,7 @@ public class ParqueaderoRecursos {
                 .horaInicio(parqueaderoDto.horaInicio())
                 .horaFin(parqueaderoDto.horaFinal())
                 .nombrePropietario(parqueaderoDto.nombrePropietario())
+                .cuposDisponibles(parqueaderoDto.cuposDisponibles())
                 .build();
         parqueaderoServicio.crearPark(parqueadero);
         return Response.status(Response.Status.CREATED).build();

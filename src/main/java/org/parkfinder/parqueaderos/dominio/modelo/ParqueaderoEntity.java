@@ -15,6 +15,7 @@ import java.time.LocalTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ParqueaderoEntity extends PanacheEntity {
+    public int idAdmin;
     public String nombre;
     public String direccion;
     public String zona;
@@ -25,4 +26,5 @@ public class ParqueaderoEntity extends PanacheEntity {
     public LocalTime horaInicio;
     public LocalTime horaFin;
     public  String nombrePropietario;
+    public int cuposDisponibles;
 }

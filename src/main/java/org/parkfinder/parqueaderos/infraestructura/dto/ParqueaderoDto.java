@@ -6,6 +6,9 @@ import jakarta.validation.constraints.NotNull;
 import java.time.LocalTime;
 
 public record ParqueaderoDto(
+
+        @NotNull(message = "El id es requerido")
+        int idAdmin,
         @NotBlank(message = "El nombre es requerido")
         String nombre,
         @NotBlank(message = "La dirección es requerida")
@@ -25,7 +28,9 @@ public record ParqueaderoDto(
         @NotNull(message = "La hora final es requerida")
         LocalTime horaFinal,
         @NotBlank(message = "El nombre del propietario o representante es requerido")
-        String nombrePropietario
+        String nombrePropietario,
+        @NotNull(message = "Los cupos disponibles es requerido")
+        int cuposDisponibles
 ) {
 
 

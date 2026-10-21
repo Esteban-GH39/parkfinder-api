@@ -6,6 +6,7 @@ import java.time.LocalTime;
 
 @Builder
 public class Parqueadero {
+    public int idAdmin;
     public String nombre;
     public String direccion;
     public String zona;
@@ -16,4 +17,14 @@ public class Parqueadero {
     public LocalTime horaInicio;
     public LocalTime horaFin;
     public String nombrePropietario;
+    public int cuposDisponibles;
+
+
+    public int getCapacidadTotal() {
+        return capacidadTotal;
+    }
+
+    public void setCuposDisponibles(int cuposDisponibles) {
+        this.cuposDisponibles = cuposDisponibles;
+    }
 }
