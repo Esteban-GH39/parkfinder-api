@@ -48,4 +48,9 @@ public class ParqueaderoServicio {
         return repositorio.listar();
     }
 
+    //METODO PARA LISTAR PARQUEADERO POR ADMIN (HU-21)
+    public List<Parqueadero> listarPorAdmin(Integer id){
+        return repositorio.listarPorAdmin(id);
+    }
+
 }

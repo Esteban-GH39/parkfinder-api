@@ -168,4 +168,21 @@ public class ParqueaderoRecursos {
         return (valor == null || valor.isBlank()) ? null : valor.trim();
     }
 
+
+
+    //ENDPOINT PARA LISTAR PARQUEADERO POR ID DE ADMIN (HU-21)
+    @GET
+    @Path("/admin/{id}")
+    @Operation(
+            summary = "Listar parqueaderos de un administrador",
+            description = "Devuelve la lista de parqueaderos registrados por el ID del administrador especificado"
+    )
+    @APIResponse(
+            responseCode = "200",
+            description = "Lista obtenida con éxito"
+    )
+    public Response listarPorAdmin(@PathParam("id")Integer id){
+        List<Parqueadero> parqueaderos = parqueaderoServicio.listarPorAdmin(id);
+        return Response.ok(parqueaderos).build();
+    }
 }

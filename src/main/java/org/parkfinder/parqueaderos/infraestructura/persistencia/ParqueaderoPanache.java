@@ -163,4 +163,27 @@ public class ParqueaderoPanache implements ParqueaderoRepositorio, PanacheReposi
         asignar.accept(nuevo);
     }
 
+
+
+    //MÉTODO PARA LISTAR PARQUEADERO POR ID DE ADMIN
+    @Override
+    public  List<Parqueadero> listarPorAdmin(Integer id){
+        List<ParqueaderoEntity> entidades = list("fk_parqueadero_admin",id);
+        return entidades.stream().map(e -> Parqueadero.builder()
+                .fk_parqueadero_admin(e.fk_parqueadero_admin)
+                .nombre(e.nombre)
+                .direccion(e.direccion)
+                .zona(e.zona)
+                .capacidadTotal(e.capacidadTotal)
+                .tarifaHora(e.tarifaHora)
+                .tarifaDia(e.tarifaDia)
+                .tarifaNoche(e.tarifaNoche)
+                .horaInicio(e.horaInicio)
+                .horaFin(e.horaFin)
+                .nombrePropietario(e.nombrePropietario)
+                .cuposDisponibles(e.cuposDisponibles)
+                .build()
+        ).toList();
+    }
+
 }

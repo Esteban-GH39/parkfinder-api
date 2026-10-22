@@ -25,4 +25,8 @@ public interface ParqueaderoRepositorio {
     //METODO LISTAR PARQUEADEROS (HU-19). Sin filtros: la búsqueda es de HU-03.
     List<ParqueaderoConsulta> listar();
 
+
+    //METODO PARA LISTAR PARQUEADEROS POR ID DE ADMIN (HU-21)
+    List<Parqueadero>listarPorAdmin(Integer id);
+
 }
