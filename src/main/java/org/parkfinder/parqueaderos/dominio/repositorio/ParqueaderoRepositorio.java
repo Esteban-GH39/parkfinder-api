@@ -6,6 +6,7 @@ import org.parkfinder.parqueaderos.dominio.modelo.ParqueaderoActualizacion;
 import org.parkfinder.parqueaderos.dominio.modelo.ParqueaderoConsulta;
 
 import java.util.List;
+import java.util.Optional;
 
 
 public interface ParqueaderoRepositorio {
@@ -29,4 +30,7 @@ public interface ParqueaderoRepositorio {
     //METODO PARA LISTAR PARQUEADEROS POR ID DE ADMIN (HU-21)
     List<Parqueadero>listarPorAdmin(Integer id);
 
+    //METODO PARA ACTUALIZAR CUPOS DE PARQUEADERO
+    Optional<Parqueadero> buscarPorId(Long id);
+    void actualizarCupos(Long id, Integer cuposdisponibles);
 }

@@ -16,6 +16,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 @ApplicationScoped
@@ -184,6 +185,37 @@ public class ParqueaderoPanache implements ParqueaderoRepositorio, PanacheReposi
                 .cuposDisponibles(e.cuposDisponibles)
                 .build()
         ).toList();
+    }
+
+
+    //METODO PARA ACTUALIZAR CUPOS DISPONIBLES POR EL ADMINISTRADOR
+    @Override
+    public Optional<Parqueadero> buscarPorId(Long id) {
+        ParqueaderoEntity entity = findById(id);
+        if (entity == null) {
+            return Optional.empty();
+        }
+
+        return Optional.of(Parqueadero.builder()
+                .fk_parqueadero_admin(entity.fk_parqueadero_admin)
+                .nombre(entity.nombre)
+                .direccion(entity.direccion)
+                .zona(entity.zona)
+                .capacidadTotal(entity.capacidadTotal)
+                .tarifaHora(entity.tarifaHora)
+                .tarifaDia(entity.tarifaDia)
+                .tarifaNoche(entity.tarifaNoche)
+                .horaInicio(entity.horaInicio)
+                .horaFin(entity.horaFin)
+                .nombrePropietario(entity.nombrePropietario)
+                .cuposDisponibles(entity.cuposDisponibles)
+                .build());
+    }
+
+    @Override
+    @Transactional
+    public void actualizarCupos(Long id, Integer cuposDisponibles) {
+        update("cuposDisponibles = ?1 WHERE id = ?2", cuposDisponibles, id);
     }
 
 }

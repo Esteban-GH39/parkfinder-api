@@ -53,4 +53,26 @@ public class ParqueaderoServicio {
         return repositorio.listarPorAdmin(id);
     }
 
+    //MEOTODO PARA ACTUALIZAR CUPOS DISPONIBLES DEL PARQUEADERO
+    @Transactional
+    public void actualizarCuposManualmente(Long parqueaderoId, int id, Integer cuposDisponibles){
+        Parqueadero parqueadero = repositorio.buscarPorId(parqueaderoId)
+                .orElseThrow(() -> new IllegalArgumentException("El parqueadero no existe"));
+
+        // Validar pertenencia (Solo el administrador dueño puede modificar sus cupos)
+        if (parqueadero.fk_parqueadero_admin != id) {
+            throw new SecurityException("No tienes permisos para modificar este parqueadero");
+        }
+
+        // Validar capacidad máxima
+        if (cuposDisponibles > parqueadero.capacidadTotal) {
+            throw new IllegalArgumentException("La cantida de cupos ingresada (" + cuposDisponibles +
+                    ") no pueden superar la capacidad total (" + parqueadero.capacidadTotal + ")");
+        }
+
+        //  Actualizar en BD
+        repositorio.actualizarCupos(parqueaderoId, cuposDisponibles);
+
+    }
+
 }
