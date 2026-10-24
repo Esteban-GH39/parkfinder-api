@@ -85,9 +85,9 @@ class ParqueaderoRecursosHu19Test {
 
     @Test
     void listar_devuelve200ConTodosLosParqueaderos() {
-        when(servicio.listar()).thenReturn(List.of(parqueaderoDePrueba()));
+        when(servicio.buscar(null)).thenReturn(List.of(parqueaderoDePrueba()));
 
-        Response respuesta = recursos.listar();
+        Response respuesta = recursos.buscar(null);
 
         assertEquals(200, respuesta.getStatus());
         @SuppressWarnings("unchecked")
@@ -98,9 +98,9 @@ class ParqueaderoRecursosHu19Test {
 
     @Test
     void listar_sinParqueaderosDevuelveListaVacia() {
-        when(servicio.listar()).thenReturn(List.of());
+        when(servicio.buscar(null)).thenReturn(List.of());
 
-        Response respuesta = recursos.listar();
+        Response respuesta = recursos.buscar(null);
 
         assertEquals(200, respuesta.getStatus());
         assertEquals(List.of(), respuesta.getEntity());

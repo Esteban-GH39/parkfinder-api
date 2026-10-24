@@ -9,6 +9,7 @@ import jakarta.ws.rs.POST;
 import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -106,17 +107,31 @@ public class ParqueaderoRecursos {
 
     @GET
     @Operation(
-            summary = "Listar parqueaderos",
-            description = "Devuelve todos los parqueaderos registrados, sin filtros. " +
-                    "La búsqueda por zona, dirección o GPS corresponde a HU-03."
+            summary = "Buscar parqueaderos por zona (HU-03)",
+            description = "Con el parámetro opcional 'zona' devuelve los parqueaderos cuya zona " +
+                    "contiene el texto (sin distinguir mayúsculas). Sin zona devuelve todos."
     )
     @APIResponse(
             responseCode = "200",
-            description = "Lista de parqueaderos (vacía si no hay ninguno)"
+            description = "Lista de parqueaderos (vacía si no hay coincidencias)"
     )
-    public Response listar(){
-        return Response.ok(parqueaderoServicio.listar().stream()
+    public Response buscar(@QueryParam("zona") String zona){
+        return Response.ok(parqueaderoServicio.buscar(zona).stream()
                 .map(ParqueaderoConsultaDto::de).toList()).build();
+    }
+
+    @GET
+    @Path("/zonas")
+    @Operation(
+            summary = "Listar zonas existentes (HU-03)",
+            description = "Devuelve las zonas distintas registradas, para que el cliente elija una."
+    )
+    @APIResponse(
+            responseCode = "200",
+            description = "Lista de zonas (vacía si no hay parqueaderos)"
+    )
+    public Response zonas(){
+        return Response.ok(parqueaderoServicio.listarZonas()).build();
     }
 
     @GET

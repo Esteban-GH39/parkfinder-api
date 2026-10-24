@@ -40,4 +40,17 @@ public class ParqueaderoServicio {
         return repositorio.listar();
     }
 
+    //MÉTODO BUSCAR POR ZONA (HU-03). Sin zona devuelve todos.
+    public List<ParqueaderoConsulta> buscar(String zona){
+        if (zona == null || zona.isBlank()) {
+            return repositorio.listar();
+        }
+        return repositorio.buscarPorZona(zona);
+    }
+
+    //MÉTODO LISTAR ZONAS EXISTENTES (HU-03)
+    public List<String> listarZonas(){
+        return repositorio.listarZonas();
+    }
+
 }
