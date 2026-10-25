@@ -4,7 +4,11 @@ import lombok.Builder;
 
 @Builder
 public class Cliente {
+    public static final String ROL_CLIENTE = "CLIENTE";
+    public static final String ROL_ADMIN = "ADMIN";
+
     public String nombre;
     public String correo;
     public String contrasenaHash;
+    public String rol;
 }

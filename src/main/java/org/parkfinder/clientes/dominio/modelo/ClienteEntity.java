@@ -20,4 +20,7 @@ public class ClienteEntity extends PanacheEntity {
     public String correo;
 
     public String contrasenaHash;
+
+    public String rol;
+    
 }

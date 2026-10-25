@@ -15,6 +15,7 @@ import org.parkfinder.clientes.infraestructura.dto.ClienteDto;
 import org.parkfinder.common.infraestructure.ResponseApi;
 import org.parkfinder.common.infraestructure.ResponseApiError;
 
+
 import java.time.Instant;
 
 @Path("/clientes")
@@ -59,10 +60,14 @@ public class ClienteRecursos {
                 .nombre(clienteDto.nombre())
                 .correo(clienteDto.correo())
                 .contrasenaHash(io.quarkus.elytron.security.common.BcryptUtil.bcryptHash(clienteDto.contrasena()))
+                .rol(Cliente.ROL_CLIENTE)
                 .build();
 
         clienteServicio.registrarCliente(cliente);
 
         return Response.status(Response.Status.CREATED).build();
     }
+
+
+
 }
