@@ -171,6 +171,7 @@ public class ParqueaderoPanache implements ParqueaderoRepositorio, PanacheReposi
     public  List<Parqueadero> listarPorAdmin(Integer id){
         List<ParqueaderoEntity> entidades = list("fk_parqueadero_admin",id);
         return entidades.stream().map(e -> Parqueadero.builder()
+                .id(e.id)
                 .fk_parqueadero_admin(e.fk_parqueadero_admin)
                 .nombre(e.nombre)
                 .direccion(e.direccion)
@@ -197,6 +198,7 @@ public class ParqueaderoPanache implements ParqueaderoRepositorio, PanacheReposi
         }
 
         return Optional.of(Parqueadero.builder()
+                .id(entity.id)
                 .fk_parqueadero_admin(entity.fk_parqueadero_admin)
                 .nombre(entity.nombre)
                 .direccion(entity.direccion)
