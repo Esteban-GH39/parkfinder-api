@@ -7,6 +7,7 @@ public class Cliente {
     public static final String ROL_CLIENTE = "CLIENTE";
     public static final String ROL_ADMIN = "ADMIN";
 
+    public Long id;
     public String nombre;
     public String correo;
     public String contrasenaHash;

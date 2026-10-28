@@ -34,6 +34,7 @@ public class ClientePanache implements ClienteRepositorio, PanacheRepository<Cli
     public Optional<Cliente> buscarPorCorreo(String correo) {
         return find("correo", correo).firstResultOptional()
                 .map(e -> Cliente.builder()
+                        .id(e.id)
                         .nombre(e.nombre)
                         .correo(e.correo)
                         .contrasenaHash(e.contrasenaHash)

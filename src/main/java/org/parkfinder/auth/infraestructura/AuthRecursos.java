@@ -35,14 +35,14 @@ public class AuthRecursos {
     @Path("/login")
     @Operation(
             summary = "Iniciar sesión",
-            description = "Valida correo y contraseña. Si son correctos devuelve nombre, correo y rol (CLIENTE o ADMIN)"
+            description = "Valida correo y contraseña. Si son correctos devuelve id, nombre, correo y rol (CLIENTE o ADMIN)"
     )
     @APIResponse(responseCode = "200", description = "Sesión iniciada")
     @APIResponse(responseCode = "400", description = "Datos de entrada inválidos")
     @APIResponse(responseCode = "401", description = "Credenciales incorrectas")
     public Response login(@Valid LoginDto loginDto) {
         return clienteServicio.autenticar(loginDto.correo(), loginDto.contrasena())
-                .map(c -> Response.ok(new SesionDto(c.nombre, c.correo, c.rol)).build())
+                .map(c -> Response.ok(new SesionDto(c.id, c.nombre, c.correo, c.rol)).build())
                 .orElseGet(() -> {
                     var responseApi = new ResponseApi();
                     responseApi.setStatus(Response.Status.UNAUTHORIZED.getStatusCode());
