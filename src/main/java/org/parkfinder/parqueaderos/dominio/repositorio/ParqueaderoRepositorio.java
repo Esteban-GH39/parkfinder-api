@@ -33,4 +33,11 @@ public interface ParqueaderoRepositorio {
     //METODO PARA ACTUALIZAR CUPOS DE PARQUEADERO
     Optional<Parqueadero> buscarPorId(Long id);
     void actualizarCupos(Long id, Integer cuposdisponibles);
+
+    //METODO BUSCAR PARQUEADEROS POR ZONA (HU-03). Coincidencia parcial, sin distinguir mayúsculas.
+    List<ParqueaderoConsulta> buscarPorZona(String zona);
+
+    //METODO LISTAR ZONAS EXISTENTES (HU-03). Sin repetidas, ordenadas alfabéticamente.
+    List<String> listarZonas();
+
 }

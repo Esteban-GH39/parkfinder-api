@@ -126,6 +126,23 @@ public class ParqueaderoPanache implements ParqueaderoRepositorio, PanacheReposi
         return listAll().stream().map(this::aConsulta).toList();
     }
 
+    //MÉTODO PARA BUSCAR POR ZONA (HU-03)
+    @Override
+    public List<ParqueaderoConsulta> buscarPorZona(String zona) {
+        return list("lower(zona) like ?1 order by zona, nombre",
+                        "%" + zona.trim().toLowerCase() + "%")
+                .stream().map(this::aConsulta).toList();
+    }
+
+    //MÉTODO PARA LISTAR ZONAS EXISTENTES (HU-03)
+    @Override
+    public List<String> listarZonas() {
+        return getEntityManager()
+                .createQuery("select distinct p.zona from ParqueaderoEntity p " +
+                        "where p.zona is not null and trim(p.zona) <> '' order by p.zona", String.class)
+                .getResultList();
+    }
+
     private ParqueaderoConsulta aConsulta(ParqueaderoEntity entidad) {
         return ParqueaderoConsulta
                 .builder()
