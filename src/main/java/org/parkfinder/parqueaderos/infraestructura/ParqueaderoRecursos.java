@@ -3,13 +3,7 @@ package org.parkfinder.parqueaderos.infraestructura;
 
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
-import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.PUT;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.PathParam;
-import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.eclipse.microprofile.openapi.annotations.Operation;
@@ -18,10 +12,7 @@ import org.parkfinder.parqueaderos.aplicacion.ParqueaderoServicio;
 import org.parkfinder.parqueaderos.dominio.modelo.HistorialCambio;
 import org.parkfinder.parqueaderos.dominio.modelo.Parqueadero;
 import org.parkfinder.parqueaderos.dominio.modelo.ParqueaderoActualizacion;
-import org.parkfinder.parqueaderos.infraestructura.dto.HistorialCambioDto;
-import org.parkfinder.parqueaderos.infraestructura.dto.ParqueaderoConsultaDto;
-import org.parkfinder.parqueaderos.infraestructura.dto.ParqueaderoActualizarDto;
-import org.parkfinder.parqueaderos.infraestructura.dto.ParqueaderoDto;
+import org.parkfinder.parqueaderos.infraestructura.dto.*;
 
 import java.util.List;
 
@@ -168,4 +159,57 @@ public class ParqueaderoRecursos {
         return (valor == null || valor.isBlank()) ? null : valor.trim();
     }
 
+
+
+    //ENDPOINT PARA LISTAR PARQUEADERO POR ID DE ADMIN (HU-21)
+    @GET
+    @Path("/admin/{id}")
+    @Operation(
+            summary = "Listar parqueaderos de un administrador",
+            description = "Devuelve la lista de parqueaderos registrados por el ID del administrador especificado"
+    )
+    @APIResponse(
+            responseCode = "200",
+            description = "Lista obtenida con éxito"
+    )
+    public Response listarPorAdmin(@PathParam("id")Integer id){
+        List<Parqueadero> parqueaderos = parqueaderoServicio.listarPorAdmin(id);
+        return Response.ok(parqueaderos).build();
+    }
+
+    //ENDPINT PARA ACTUALIZAR CANTIDAD DE CUPOS POR PARTE DEL ADMIN
+    @PATCH
+    @Path("/{id}/cuposDisponibles")
+    @Operation(
+            summary = "Actualización manual de cupos (HU-21)",
+            description = "Permite al administrador modificar manualmente los cupos disponibles de su parqueadero"
+    )
+    @APIResponse(
+            responseCode = "200",
+            description = "Cupos actualizados correctamente"
+    )
+    @APIResponse(
+            responseCode = "400",
+            description = "Supera la capacidad total o valor negativo"
+    )
+    @APIResponse(
+            responseCode = "403",
+            description = "No pertenece al administrador enviado"
+    )
+    @APIResponse(responseCode = "404",
+            description = "Parqueadero no encontrado"
+    )
+    public Response actualizarCupos(
+            @PathParam("id") Long id,
+            @Valid ActualizarCuposDto dto) {
+
+        try {
+            parqueaderoServicio.actualizarCuposManualmente(id, dto.id(), dto.cuposDisponibles());
+            return Response.ok("Cupos actualizados con éxito").build();
+        } catch (IllegalArgumentException e) {
+            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
+        } catch (SecurityException e) {
+            return Response.status(Response.Status.FORBIDDEN).entity(e.getMessage()).build();
+        }
+    }
 }
