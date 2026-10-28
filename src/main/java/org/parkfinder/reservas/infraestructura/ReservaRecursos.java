@@ -14,6 +14,7 @@ import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.parkfinder.reservas.aplicacion.ReservaServicio;
 import org.parkfinder.reservas.infraestructura.dto.ReservaConsultaDto;
+import org.parkfinder.reservas.infraestructura.dto.ReservaDetalleDto;
 import org.parkfinder.reservas.infraestructura.dto.ReservaDto;
 
 @Path("/reservas")
@@ -38,6 +39,19 @@ public class ReservaRecursos {
         var reserva = reservaServicio.reservar(
                 reservaDto.clienteId(), reservaDto.parqueaderoId(), reservaDto.fechaHoraLlegada());
         return Response.status(Response.Status.CREATED).entity(ReservaConsultaDto.de(reserva)).build();
+    }
+
+    @GET
+    @Path("/admin/{adminId}")
+    @Operation(
+            summary = "Reservas de mis parqueaderos",
+            description = "Lista las reservas de los parqueaderos de un dueño, la más reciente primero, " +
+                    "con el cliente que reservó y el estado. Las retenciones vencidas se marcan EXPIRADA."
+    )
+    @APIResponse(responseCode = "200", description = "Reservas del dueño (vacía si no tiene)")
+    public Response listarPorAdmin(@PathParam("adminId") int adminId) {
+        return Response.ok(reservaServicio.listarPorAdmin(adminId).stream()
+                .map(ReservaDetalleDto::de).toList()).build();
     }
 
     @GET

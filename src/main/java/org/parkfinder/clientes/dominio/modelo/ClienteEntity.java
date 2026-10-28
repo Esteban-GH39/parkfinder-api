@@ -22,5 +22,7 @@ public class ClienteEntity extends PanacheEntity {
     public String contrasenaHash;
 
     public String rol;
-    
+
+    // Dueño al que pertenece la cuenta cuando el rol es ADMIN (id de la tabla ADMIN)
+    public Integer adminId;
 }

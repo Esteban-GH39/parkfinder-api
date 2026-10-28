@@ -157,6 +157,8 @@ public class ParqueaderoPanache implements ParqueaderoRepositorio, PanacheReposi
                 .horaInicio(entidad.horaInicio)
                 .horaFin(entidad.horaFin)
                 .nombrePropietario(entidad.nombrePropietario)
+                .cuposDisponibles(entidad.cuposDisponibles)
+                .adminId(entidad.fk_parqueadero_admin)
                 .build();
     }
 

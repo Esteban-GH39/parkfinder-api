@@ -8,10 +8,12 @@ import org.parkfinder.parqueaderos.dominio.repositorio.ParqueaderoRepositorio;
 import org.parkfinder.reservas.dominio.excepcion.ReservaInvalidaException;
 import org.parkfinder.reservas.dominio.modelo.EstadoReserva;
 import org.parkfinder.reservas.dominio.modelo.Reserva;
+import org.parkfinder.reservas.dominio.modelo.ReservaDetalle;
 import org.parkfinder.reservas.dominio.repositorio.ReservaRepositorio;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.List;
 
 @ApplicationScoped
 public class ReservaServicio {
@@ -51,6 +53,11 @@ public class ReservaServicio {
     //MÉTODO CONSULTAR UNA RESERVA (HU-06)
     public Reserva obtenerPorId(Long id) {
         return repositorio.obtenerPorId(id);
+    }
+
+    //MÉTODO LISTAR LAS RESERVAS DE LOS PARQUEADEROS DE UN DUEÑO
+    public List<ReservaDetalle> listarPorAdmin(int adminId) {
+        return repositorio.listarPorAdmin(adminId);
     }
 
     private void validarHorario(ParqueaderoConsulta parqueadero, LocalTime llegada) {

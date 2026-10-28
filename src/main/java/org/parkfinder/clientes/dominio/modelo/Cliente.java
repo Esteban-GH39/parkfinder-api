@@ -12,4 +12,8 @@ public class Cliente {
     public String correo;
     public String contrasenaHash;
     public String rol;
+    public Integer adminId;
+    // Solo para registrar a un dueño: datos que pide la tabla ADMIN
+    public Long telefono;
+    public Long cedula;
 }

@@ -17,6 +17,14 @@ public record ClienteDto(
             regexp = "^(?=.*[A-Za-z])(?=.*\\d).{8,}$",
             message = "La contraseña debe tener mínimo 8 caracteres, con al menos una letra y un número"
         )
-        String contrasena
+        String contrasena,
+
+        // CLIENTE (por defecto) o ADMIN, el dueño de uno o más parqueaderos
+        @Pattern(regexp = "^(CLIENTE|ADMIN)$", message = "El rol debe ser CLIENTE o ADMIN")
+        String rol,
+
+        // Solo se piden al registrarse como ADMIN
+        Long telefono,
+        Long cedula
 ) {
 }

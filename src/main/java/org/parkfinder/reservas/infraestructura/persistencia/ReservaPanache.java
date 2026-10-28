@@ -12,11 +12,14 @@ import org.parkfinder.reservas.dominio.excepcion.ReservaNoEncontradaException;
 import org.parkfinder.reservas.dominio.excepcion.SinCupoException;
 import org.parkfinder.reservas.dominio.modelo.EstadoReserva;
 import org.parkfinder.reservas.dominio.modelo.Reserva;
+import org.parkfinder.reservas.dominio.modelo.ReservaDetalle;
 import org.parkfinder.reservas.dominio.modelo.ReservaEntity;
 import org.parkfinder.reservas.dominio.repositorio.ReservaRepositorio;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @ApplicationScoped
 public class ReservaPanache implements ReservaRepositorio, PanacheRepository<ReservaEntity> {
@@ -70,6 +73,39 @@ public class ReservaPanache implements ReservaRepositorio, PanacheRepository<Res
             liberarVencidas(parqueadero);
         }
         return aDominio(entidad);
+    }
+
+    //MÉTODO PARA LISTAR LAS RESERVAS DE LOS PARQUEADEROS DE UN DUEÑO
+    @Override
+    @Transactional
+    public List<ReservaDetalle> listarPorAdmin(int adminId) {
+        List<ParqueaderoEntity> parqueaderos = ParqueaderoEntity.list("fk_parqueadero_admin", adminId);
+        if (parqueaderos.isEmpty()) {
+            return List.of();
+        }
+        // Se libera lo vencido antes de listar, para que estado y cupos cuenten lo mismo
+        for (ParqueaderoEntity p : parqueaderos) {
+            liberarVencidas(ParqueaderoEntity.findById(p.id, LockModeType.PESSIMISTIC_WRITE));
+        }
+        Map<Long, String> nombres = parqueaderos.stream()
+                .collect(Collectors.toMap(p -> p.id, p -> p.nombre));
+
+        List<ReservaEntity> reservas = list("parqueaderoId in ?1 order by creadaEn desc", nombres.keySet());
+        return reservas.stream().map(r -> {
+            ClienteEntity cliente = ClienteEntity.findById(r.clienteId);
+            return ReservaDetalle
+                    .builder()
+                    .id(r.id)
+                    .parqueaderoId(r.parqueaderoId)
+                    .parqueaderoNombre(nombres.get(r.parqueaderoId))
+                    .clienteNombre(cliente != null ? cliente.nombre : null)
+                    .clienteCorreo(cliente != null ? cliente.correo : null)
+                    .fechaHoraLlegada(r.fechaHoraLlegada)
+                    .estado(r.estado)
+                    .creadaEn(r.creadaEn)
+                    .expiraEn(r.expiraEn)
+                    .build();
+        }).toList();
     }
 
     /**

@@ -21,7 +21,9 @@ public record ParqueaderoConsultaDto(
         Double tarifaNoche,
         LocalTime horaInicio,
         LocalTime horaFin,
-        String nombrePropietario
+        String nombrePropietario,
+        int cuposDisponibles,
+        Integer adminId
 ) {
 
     public static ParqueaderoConsultaDto de(ParqueaderoConsulta p) {
@@ -36,6 +38,8 @@ public record ParqueaderoConsultaDto(
                 p.tarifaNoche,
                 p.horaInicio,
                 p.horaFin,
-                p.nombrePropietario);
+                p.nombrePropietario,
+                p.cuposDisponibles,
+                p.adminId);
     }
 }

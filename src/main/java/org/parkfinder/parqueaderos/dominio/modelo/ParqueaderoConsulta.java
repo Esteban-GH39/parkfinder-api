@@ -23,4 +23,6 @@ public class ParqueaderoConsulta {
     public LocalTime horaInicio;
     public LocalTime horaFin;
     public String nombrePropietario;
+    public int cuposDisponibles;
+    public Integer adminId;
 }

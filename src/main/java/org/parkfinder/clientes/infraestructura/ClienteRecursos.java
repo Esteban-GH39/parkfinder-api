@@ -32,7 +32,8 @@ public class ClienteRecursos {
     @POST
     @Operation(
             summary = "Registrar nuevo cliente",
-            description = "Crea una cuenta de cliente con nombre, correo y contraseña, para acceder a búsqueda, reserva y pago"
+            description = "Crea una cuenta con nombre, correo y contraseña. Por defecto es de cliente (búsqueda, reserva y pago); " +
+                    "con rol ADMIN es de dueño de parqueadero y además pide teléfono y cédula"
     )
     @APIResponse(responseCode = "201", description = "Cliente registrado")
     @APIResponse(responseCode = "400", description = "Datos de entrada inválidos")
@@ -55,12 +56,31 @@ public class ClienteRecursos {
             return Response.status(Response.Status.CONFLICT).entity(responseApi).build();
         }
 
+        boolean esAdmin = Cliente.ROL_ADMIN.equals(clienteDto.rol());
+        if (esAdmin && (clienteDto.telefono() == null || clienteDto.cedula() == null)) {
+            var responseApi = new ResponseApi();
+            responseApi.setStatus(Response.Status.BAD_REQUEST.getStatusCode());
+            responseApi.setTimestamp(Instant.now().toString());
+            responseApi.setPath(uriInfo.getPath());
+            responseApi.setSucces(false);
+            responseApi.setCodigo("CLIENTE-ERR-400");
+            responseApi.setMensaje("Un dueño debe indicar teléfono y cédula");
+            responseApi.setError(ResponseApiError.builder()
+                    .mensaje("Un dueño debe indicar teléfono y cédula")
+                    .codigo("CLIENTE-ERR-400")
+                    .build());
+
+            return Response.status(Response.Status.BAD_REQUEST).entity(responseApi).build();
+        }
+
         Cliente cliente = Cliente
                 .builder()
                 .nombre(clienteDto.nombre())
                 .correo(clienteDto.correo())
                 .contrasenaHash(io.quarkus.elytron.security.common.BcryptUtil.bcryptHash(clienteDto.contrasena()))
-                .rol(Cliente.ROL_CLIENTE)
+                .rol(esAdmin ? Cliente.ROL_ADMIN : Cliente.ROL_CLIENTE)
+                .telefono(clienteDto.telefono())
+                .cedula(clienteDto.cedula())
                 .build();
 
         clienteServicio.registrarCliente(cliente);
