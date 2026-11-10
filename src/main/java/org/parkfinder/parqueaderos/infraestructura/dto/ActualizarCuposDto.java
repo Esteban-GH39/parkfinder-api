@@ -9,6 +9,10 @@ public record ActualizarCuposDto(
 
         @NotNull(message = "La cantidad de cupos es requerida")
         @Min(value = 0, message = "Los cupos disponibles no pueden ser negativos")
-        Integer cuposDisponibles
+        Integer cuposDisponibles,
+
+        /** Cupos libres de motos (parte de cuposDisponibles); si no llega, no se cambian. */
+        @Min(value = 0, message = "Los cupos de motos no pueden ser negativos")
+        Integer cuposMotos
 ) {
 }

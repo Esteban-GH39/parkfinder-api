@@ -13,5 +13,7 @@ public class Comprobante {
     public String estadoTransaccion;
     public Long fk_comprobante_cliente;
     public Long fk_comprobante_parqueadero;
+    /** Reserva que pagó este comprobante; su id es el código de reserva. */
+    public Long reservaId;
 
 }

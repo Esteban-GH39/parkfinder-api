@@ -26,6 +26,17 @@ public record ParqueaderoActualizarDto(
         Double tarifaNoche,
         LocalTime horaInicio,
         LocalTime horaFinal,
-        String nombrePropietario
+        String nombrePropietario,
+        @Min(value = 0, message = "Los cupos de motos no pueden ser negativos")
+        Integer capacidadMotos,
+        @PositiveOrZero(message = "La tarifa de moto no puede ser negativa")
+        Double tarifaHoraMoto
 ) {
+    /** Edición sin tocar los cupos ni la tarifa de motos (la forma que tenía antes de separar carros y motos). */
+    public ParqueaderoActualizarDto(String nombre, String direccion, String zona, Integer capacidadTotal,
+                                    Double tarifaHora, Double tarifaDia, Double tarifaNoche,
+                                    LocalTime horaInicio, LocalTime horaFinal, String nombrePropietario) {
+        this(nombre, direccion, zona, capacidadTotal, tarifaHora, tarifaDia, tarifaNoche, horaInicio, horaFinal,
+                nombrePropietario, null, null);
+    }
 }

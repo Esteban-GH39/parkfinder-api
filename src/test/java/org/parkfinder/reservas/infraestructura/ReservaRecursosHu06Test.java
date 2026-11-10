@@ -50,9 +50,9 @@ class ReservaRecursosHu06Test {
 
     @Test
     void reservar_devuelve201ConLaReservaRetenida() {
-        when(servicio.reservar(1L, 7L, llegada)).thenReturn(reservaDePrueba());
+        when(servicio.reservar(1L, 7L, llegada, null, null)).thenReturn(reservaDePrueba());
 
-        Response respuesta = recursos.reservar(new ReservaDto(1L, 7L, llegada));
+        Response respuesta = recursos.reservar(new ReservaDto(1L, 7L, llegada, null, null));
 
         assertEquals(201, respuesta.getStatus());
         ReservaConsultaDto dto = (ReservaConsultaDto) respuesta.getEntity();
@@ -63,10 +63,10 @@ class ReservaRecursosHu06Test {
 
     @Test
     void reservar_sinCupoPropagaElErrorParaQueElMapperResponda409() {
-        when(servicio.reservar(1L, 7L, llegada)).thenThrow(new SinCupoException(7L));
+        when(servicio.reservar(1L, 7L, llegada, null, null)).thenThrow(new SinCupoException(7L));
 
         SinCupoException error = assertThrows(SinCupoException.class,
-                () -> recursos.reservar(new ReservaDto(1L, 7L, llegada)));
+                () -> recursos.reservar(new ReservaDto(1L, 7L, llegada, null, null)));
 
         assertEquals(409, error.getStatus());
     }

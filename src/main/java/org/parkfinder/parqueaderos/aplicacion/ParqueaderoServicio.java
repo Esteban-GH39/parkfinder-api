@@ -22,6 +22,13 @@ public class ParqueaderoServicio {
     @Transactional
     public void crearPark(Parqueadero parqueadero){
         //Cantidad de cupos disponibles debe ser inicialmente la misma cantidad de cupos totales
+        int motos = parqueadero.capacidadMotos == null ? 0 : parqueadero.capacidadMotos;
+        if (motos > parqueadero.getCapacidadTotal()) {
+            throw new IllegalArgumentException("Los cupos de motos (" + motos +
+                    ") no pueden superar la capacidad total (" + parqueadero.getCapacidadTotal() + ")");
+        }
+        parqueadero.capacidadMotos = motos;
+        parqueadero.cuposMotos = motos;
         if(parqueadero.getCapacidadTotal() > 0){
             parqueadero.setCuposDisponibles(parqueadero.getCapacidadTotal());
         }
@@ -56,6 +63,12 @@ public class ParqueaderoServicio {
     //MEOTODO PARA ACTUALIZAR CUPOS DISPONIBLES DEL PARQUEADERO
     @Transactional
     public void actualizarCuposManualmente(Long parqueaderoId, int id, Integer cuposDisponibles){
+        actualizarCuposManualmente(parqueaderoId, id, cuposDisponibles, null);
+    }
+
+    //MÉTODO PARA ACTUALIZAR CUPOS LIBRES DE CARROS Y MOTOS: cuposDisponibles es el total y cuposMotos la parte de motos
+    @Transactional
+    public void actualizarCuposManualmente(Long parqueaderoId, int id, Integer cuposDisponibles, Integer cuposMotos){
         Parqueadero parqueadero = repositorio.buscarPorId(parqueaderoId)
                 .orElseThrow(() -> new IllegalArgumentException("El parqueadero no existe"));
 
@@ -70,8 +83,23 @@ public class ParqueaderoServicio {
                     ") no pueden superar la capacidad total (" + parqueadero.capacidadTotal + ")");
         }
 
-        //  Actualizar en BD
-        repositorio.actualizarCupos(parqueaderoId, cuposDisponibles);
+        if (cuposMotos == null) {
+            //  Actualizar en BD
+            repositorio.actualizarCupos(parqueaderoId, cuposDisponibles);
+            return;
+        }
+        int capacidadMotos = parqueadero.capacidadMotos == null ? 0 : parqueadero.capacidadMotos;
+        if (cuposMotos > capacidadMotos) {
+            throw new IllegalArgumentException("Los cupos libres de motos (" + cuposMotos +
+                    ") no pueden superar los cupos de motos del parqueadero (" + capacidadMotos + ")");
+        }
+        int carros = cuposDisponibles - cuposMotos;
+        int capacidadCarros = parqueadero.capacidadTotal - capacidadMotos;
+        if (carros > capacidadCarros) {
+            throw new IllegalArgumentException("Los cupos libres de carros (" + carros +
+                    ") no pueden superar los cupos de carros del parqueadero (" + capacidadCarros + ")");
+        }
+        repositorio.actualizarCupos(parqueaderoId, cuposDisponibles, cuposMotos);
 
     }
 

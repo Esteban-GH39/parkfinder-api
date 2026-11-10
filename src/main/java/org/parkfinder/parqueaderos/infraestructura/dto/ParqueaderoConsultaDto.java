@@ -23,7 +23,12 @@ public record ParqueaderoConsultaDto(
         LocalTime horaFin,
         String nombrePropietario,
         int cuposDisponibles,
-        Integer adminId
+        Integer adminId,
+        int capacidadMotos,
+        int cuposMotos,
+        int capacidadCarros,
+        int cuposCarros,
+        Double tarifaHoraMoto
 ) {
 
     public static ParqueaderoConsultaDto de(ParqueaderoConsulta p) {
@@ -40,6 +45,11 @@ public record ParqueaderoConsultaDto(
                 p.horaFin,
                 p.nombrePropietario,
                 p.cuposDisponibles,
-                p.adminId);
+                p.adminId,
+                p.capacidadMotos,
+                p.cuposMotos,
+                Math.max(0, p.capacidadTotal - p.capacidadMotos),
+                Math.max(0, p.cuposDisponibles - p.cuposMotos),
+                p.tarifaHoraMoto);
     }
 }

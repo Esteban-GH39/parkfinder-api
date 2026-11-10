@@ -17,6 +17,8 @@ public class ParqueaderoActualizacion {
     public String direccion;
     public String zona;
     public Integer capacidadTotal;
+    public Integer capacidadMotos;
+    public Double tarifaHoraMoto;
     public Double tarifaHora;
     public Double tarifaDia;
     public Double tarifaNoche;

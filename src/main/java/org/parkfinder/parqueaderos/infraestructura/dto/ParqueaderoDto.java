@@ -2,7 +2,9 @@ package org.parkfinder.parqueaderos.infraestructura.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PositiveOrZero;
 
 import java.time.LocalTime;
 
@@ -30,7 +32,11 @@ public record ParqueaderoDto(
         @NotNull(message = "La hora final es requerida")
         LocalTime horaFinal,
         @NotBlank(message = "El nombre del propietario o representante es requerido")
-        String nombrePropietario
+        String nombrePropietario,
+        @Min(value = 0, message = "Los cupos de motos no pueden ser negativos")
+        Integer capacidadMotos,
+        @PositiveOrZero(message = "La tarifa de moto no puede ser negativa")
+        Double tarifaHoraMoto
 
 ) {
 

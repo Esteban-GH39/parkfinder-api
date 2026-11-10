@@ -24,5 +24,8 @@ public class ParqueaderoConsulta {
     public LocalTime horaFin;
     public String nombrePropietario;
     public int cuposDisponibles;
+    public int capacidadMotos;
+    public int cuposMotos;
+    public Double tarifaHoraMoto;
     public Integer adminId;
 }

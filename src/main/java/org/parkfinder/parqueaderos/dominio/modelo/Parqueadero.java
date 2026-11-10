@@ -19,6 +19,12 @@ public class Parqueadero {
     public LocalTime horaFin;
     public String nombrePropietario;
     public int cuposDisponibles;
+    /** Parte de capacidadTotal que es de motos (el resto es de carros); null equivale a 0. */
+    public Integer capacidadMotos;
+    /** Parte de cuposDisponibles que es de motos; null equivale a 0. */
+    public Integer cuposMotos;
+    /** Tarifa por hora de la moto; null significa que paga la misma tarifa que el carro. */
+    public Double tarifaHoraMoto;
 
 
     public int getCapacidadTotal() {
