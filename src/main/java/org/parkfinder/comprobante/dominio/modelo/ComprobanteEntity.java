@@ -25,6 +25,7 @@ public class ComprobanteEntity extends PanacheEntity {
     public Double valorPago;
     public String medioPago;
     public String estadoTransaccion;
+    public Long reservaId;
 
     // LLAVE FORANEA HACIA CLIENTES(id)
     @ManyToOne(fetch = FetchType.LAZY)

@@ -53,8 +53,14 @@ public class ParqueaderoRecursos {
                 .horaFin(parqueaderoDto.horaFinal())
                 .nombrePropietario(parqueaderoDto.nombrePropietario())
                 .cuposDisponibles(parqueaderoDto.capacidadTotal())
+                .capacidadMotos(parqueaderoDto.capacidadMotos())
+                .tarifaHoraMoto(parqueaderoDto.tarifaHoraMoto())
                 .build();
-        parqueaderoServicio.crearPark(parqueadero);
+        try {
+            parqueaderoServicio.crearPark(parqueadero);
+        } catch (IllegalArgumentException e) {
+            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
+        }
         return Response.status(Response.Status.CREATED).build();
     }
 
@@ -85,6 +91,8 @@ public class ParqueaderoRecursos {
                 .direccion(enBlancoComoNulo(parqueaderoDto.direccion()))
                 .zona(enBlancoComoNulo(parqueaderoDto.zona()))
                 .capacidadTotal(parqueaderoDto.capacidadTotal())
+                .capacidadMotos(parqueaderoDto.capacidadMotos())
+                .tarifaHoraMoto(parqueaderoDto.tarifaHoraMoto())
                 .tarifaHora(parqueaderoDto.tarifaHora())
                 .tarifaDia(parqueaderoDto.tarifaDia())
                 .tarifaNoche(parqueaderoDto.tarifaNoche())
@@ -93,7 +101,12 @@ public class ParqueaderoRecursos {
                 .nombrePropietario(enBlancoComoNulo(parqueaderoDto.nombrePropietario()))
                 .build();
 
-        List<HistorialCambio> cambios = parqueaderoServicio.actualizarPark(id, datos);
+        List<HistorialCambio> cambios;
+        try {
+            cambios = parqueaderoServicio.actualizarPark(id, datos);
+        } catch (IllegalArgumentException e) {
+            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
+        }
         return Response.ok(cambios.stream().map(HistorialCambioDto::de).toList()).build();
     }
 
@@ -218,7 +231,7 @@ public class ParqueaderoRecursos {
             @Valid ActualizarCuposDto dto) {
 
         try {
-            parqueaderoServicio.actualizarCuposManualmente(id, dto.id(), dto.cuposDisponibles());
+            parqueaderoServicio.actualizarCuposManualmente(id, dto.id(), dto.cuposDisponibles(), dto.cuposMotos());
             return Response.ok("Cupos actualizados con éxito").build();
         } catch (IllegalArgumentException e) {
             return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();

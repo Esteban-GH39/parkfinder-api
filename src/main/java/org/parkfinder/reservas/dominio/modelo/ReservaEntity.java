@@ -19,6 +19,10 @@ import java.time.LocalDateTime;
 public class ReservaEntity extends PanacheEntity {
     public Long clienteId;
     public Long parqueaderoId;
+    public Integer cantidad;
+    public Integer cantidadMotos;
+    /** Cuándo el dueño validó el código de reserva; null mientras no se haya usado. */
+    public LocalDateTime validadaEn;
     public LocalDateTime fechaHoraLlegada;
     @Enumerated(EnumType.STRING)
     public EstadoReserva estado;

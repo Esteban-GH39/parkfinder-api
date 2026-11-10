@@ -39,6 +39,9 @@ public class ParqueaderoPanache implements ParqueaderoRepositorio, PanacheReposi
                 .horaFin(parqueadero.horaFin)
                 .nombrePropietario(parqueadero.nombrePropietario)
                 .cuposDisponibles(parqueadero.cuposDisponibles)
+                .capacidadMotos(parqueadero.capacidadMotos)
+                .cuposMotos(parqueadero.cuposMotos)
+                .tarifaHoraMoto(parqueadero.tarifaHoraMoto)
                 .build();
         persist(parqueaderoEntity);
     }
@@ -52,6 +55,8 @@ public class ParqueaderoPanache implements ParqueaderoRepositorio, PanacheReposi
             throw new ParqueaderoNoEncontradoException(id);
         }
 
+        int motosAntes = entidad.capacidadMotos == null ? 0 : entidad.capacidadMotos;
+
         List<HistorialCambio> cambios = new ArrayList<>();
         registrar(cambios, id, "nombre", entidad.nombre, datos.nombre,
                 valor -> entidad.nombre = valor);
@@ -61,6 +66,10 @@ public class ParqueaderoPanache implements ParqueaderoRepositorio, PanacheReposi
                 valor -> entidad.zona = valor);
         registrar(cambios, id, "capacidadTotal", entidad.capacidadTotal, datos.capacidadTotal,
                 valor -> entidad.capacidadTotal = valor);
+        registrar(cambios, id, "capacidadMotos", entidad.capacidadMotos == null ? 0 : entidad.capacidadMotos,
+                datos.capacidadMotos, valor -> entidad.capacidadMotos = valor);
+        registrar(cambios, id, "tarifaHoraMoto", entidad.tarifaHoraMoto, datos.tarifaHoraMoto,
+                valor -> entidad.tarifaHoraMoto = valor);
         registrar(cambios, id, "tarifaHora", entidad.tarifaHora, datos.tarifaHora,
                 valor -> entidad.tarifaHora = valor);
         registrar(cambios, id, "tarifaDia", entidad.tarifaDia, datos.tarifaDia,
@@ -73,6 +82,20 @@ public class ParqueaderoPanache implements ParqueaderoRepositorio, PanacheReposi
                 valor -> entidad.horaFin = valor);
         registrar(cambios, id, "nombrePropietario", entidad.nombrePropietario, datos.nombrePropietario,
                 valor -> entidad.nombrePropietario = valor);
+
+        int motos = entidad.capacidadMotos == null ? 0 : entidad.capacidadMotos;
+        // Si cambió la capacidad de motos, sus cupos libres (y el total libre) se mueven lo mismo
+        int diferencia = motos - motosAntes;
+        if (diferencia != 0) {
+            int cuposMotos = entidad.cuposMotos == null ? 0 : entidad.cuposMotos;
+            entidad.cuposMotos = Math.max(0, Math.min(motos, cuposMotos + diferencia));
+            entidad.cuposDisponibles = Math.max(0, Math.min(entidad.capacidadTotal, entidad.cuposDisponibles + diferencia));
+        }
+        if (motos > entidad.capacidadTotal) {
+            // Al lanzar, la transacción se revierte y no queda nada guardado
+            throw new IllegalArgumentException("Los cupos de motos (" + motos +
+                    ") no pueden superar la capacidad total (" + entidad.capacidadTotal + ")");
+        }
 
         // La entidad está gestionada dentro de la transacción, así que los
         // cambios se guardan solos. Falta persistir los renglones del historial.
@@ -158,6 +181,9 @@ public class ParqueaderoPanache implements ParqueaderoRepositorio, PanacheReposi
                 .horaFin(entidad.horaFin)
                 .nombrePropietario(entidad.nombrePropietario)
                 .cuposDisponibles(entidad.cuposDisponibles)
+                .capacidadMotos(entidad.capacidadMotos == null ? 0 : entidad.capacidadMotos)
+                .cuposMotos(entidad.cuposMotos == null ? 0 : entidad.cuposMotos)
+                .tarifaHoraMoto(entidad.tarifaHoraMoto)
                 .adminId(entidad.fk_parqueadero_admin)
                 .build();
     }
@@ -203,6 +229,9 @@ public class ParqueaderoPanache implements ParqueaderoRepositorio, PanacheReposi
                 .horaFin(e.horaFin)
                 .nombrePropietario(e.nombrePropietario)
                 .cuposDisponibles(e.cuposDisponibles)
+                .capacidadMotos(e.capacidadMotos == null ? 0 : e.capacidadMotos)
+                .cuposMotos(e.cuposMotos == null ? 0 : e.cuposMotos)
+                .tarifaHoraMoto(e.tarifaHoraMoto)
                 .build()
         ).toList();
     }
@@ -230,6 +259,9 @@ public class ParqueaderoPanache implements ParqueaderoRepositorio, PanacheReposi
                 .horaFin(entity.horaFin)
                 .nombrePropietario(entity.nombrePropietario)
                 .cuposDisponibles(entity.cuposDisponibles)
+                .capacidadMotos(entity.capacidadMotos)
+                .cuposMotos(entity.cuposMotos)
+                .tarifaHoraMoto(entity.tarifaHoraMoto)
                 .build());
     }
 
@@ -237,6 +269,12 @@ public class ParqueaderoPanache implements ParqueaderoRepositorio, PanacheReposi
     @Transactional
     public void actualizarCupos(Long id, Integer cuposDisponibles) {
         update("cuposDisponibles = ?1 WHERE id = ?2", cuposDisponibles, id);
+    }
+
+    @Override
+    @Transactional
+    public void actualizarCupos(Long id, Integer cuposDisponibles, Integer cuposMotos) {
+        update("cuposDisponibles = ?1, cuposMotos = ?2 WHERE id = ?3", cuposDisponibles, cuposMotos, id);
     }
 
 }

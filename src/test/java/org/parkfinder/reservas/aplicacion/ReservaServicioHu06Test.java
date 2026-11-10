@@ -68,6 +68,45 @@ class ReservaServicioHu06Test {
     }
 
     @Test
+    void reservar_sinIndicarCantidadPideUnCupoDeCarro() {
+        Reserva reserva = servicio.reservar(1L, 7L, llegadaManana(10));
+
+        assertEquals(1, reserva.cantidad);
+        assertEquals(0, reserva.cantidadMotos);
+    }
+
+    @Test
+    void reservar_variosCuposLosEntregaJuntosAlRepositorio() {
+        Reserva reserva = servicio.reservar(1L, 7L, llegadaManana(10), 3);
+
+        assertEquals(3, reserva.cantidad);
+        assertEquals(0, reserva.cantidadMotos);
+    }
+
+    @Test
+    void reservar_carrosYMotosEnUnaMismaReserva() {
+        Reserva reserva = servicio.reservar(1L, 7L, llegadaManana(10), 2, 1);
+
+        assertEquals(3, reserva.cantidad);
+        assertEquals(1, reserva.cantidadMotos);
+    }
+
+    @Test
+    void reservar_soloMotosNoAgregaUnCarroPorDefecto() {
+        Reserva reserva = servicio.reservar(1L, 7L, llegadaManana(10), null, 2);
+
+        assertEquals(2, reserva.cantidad);
+        assertEquals(2, reserva.cantidadMotos);
+    }
+
+    @Test
+    void reservar_sinNingunCupoOConNegativosSeRechazaSinRetener() {
+        assertThrows(ReservaInvalidaException.class, () -> servicio.reservar(1L, 7L, llegadaManana(10), 0, 0));
+        assertThrows(ReservaInvalidaException.class, () -> servicio.reservar(1L, 7L, llegadaManana(10), -1, 2));
+        verify(repositorio, never()).retenerCupo(any());
+    }
+
+    @Test
     void reservar_sinCupoPropagaElErrorYNoGeneraRetencion() {
         when(repositorio.retenerCupo(any())).thenThrow(new SinCupoException(7L));
 

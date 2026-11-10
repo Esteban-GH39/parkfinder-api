@@ -37,8 +37,47 @@ public class ReservaRecursos {
     @APIResponse(responseCode = "409", description = "No hay cupos disponibles; no se genera retención")
     public Response reservar(@Valid ReservaDto reservaDto) {
         var reserva = reservaServicio.reservar(
-                reservaDto.clienteId(), reservaDto.parqueaderoId(), reservaDto.fechaHoraLlegada());
-        return Response.status(Response.Status.CREATED).entity(ReservaConsultaDto.de(reserva)).build();
+                reservaDto.clienteId(), reservaDto.parqueaderoId(), reservaDto.fechaHoraLlegada(),
+                reservaDto.cantidadCarros(), reservaDto.cantidadMotos());
+        return Response.status(Response.Status.CREATED).entity(ReservaConsultaDto.de(reserva, reservaServicio.costoReserva())).build();
+    }
+
+    @GET
+    @Path("/cliente/{clienteId}/pendientes")
+    @Operation(
+            summary = "Reservas pendientes de pago de un cliente (HU-07)",
+            description = "Lista las reservas retenidas que todavía no vencen, para retomar el pago. " +
+                    "Incluye la tarifa del parqueadero."
+    )
+    @APIResponse(responseCode = "200", description = "Reservas pendientes (vacía si no tiene)")
+    public Response listarPendientes(@PathParam("clienteId") Long clienteId) {
+        return Response.ok(reservaServicio.listarPendientesPorCliente(clienteId).stream()
+                .map(r -> ReservaDetalleDto.de(r, reservaServicio.costoReserva())).toList()).build();
+    }
+
+    @GET
+    @Path("/cliente/{clienteId}/confirmadas")
+    @Operation(
+            summary = "Reservas confirmadas de un cliente",
+            description = "Lista las reservas ya pagadas que todavía no se han usado, con su código de reserva."
+    )
+    @APIResponse(responseCode = "200", description = "Reservas confirmadas (vacía si no tiene)")
+    public Response listarConfirmadas(@PathParam("clienteId") Long clienteId) {
+        return Response.ok(reservaServicio.listarConfirmadasPorCliente(clienteId).stream()
+                .map(r -> ReservaDetalleDto.de(r, reservaServicio.costoReserva())).toList()).build();
+    }
+
+    @POST
+    @Path("/{id}/validar")
+    @Operation(
+            summary = "Validar el código de reserva",
+            description = "El dueño confirma que el cliente llegó: queda anotada la hora y el código no se puede usar de nuevo."
+    )
+    @APIResponse(responseCode = "200", description = "Código validado")
+    @APIResponse(responseCode = "404", description = "La reserva no existe")
+    @APIResponse(responseCode = "409", description = "La reserva no está confirmada o ya se usó")
+    public Response validar(@PathParam("id") Long id) {
+        return Response.ok(ReservaConsultaDto.de(reservaServicio.validar(id), reservaServicio.costoReserva())).build();
     }
 
     @GET
