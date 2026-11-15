@@ -30,13 +30,26 @@ public record ParqueaderoActualizarDto(
         @Min(value = 0, message = "Los cupos de motos no pueden ser negativos")
         Integer capacidadMotos,
         @PositiveOrZero(message = "La tarifa de moto no puede ser negativa")
-        Double tarifaHoraMoto
+        Double tarifaHoraMoto,
+        @PositiveOrZero(message = "La tarifa día de moto no puede ser negativa")
+        Double tarifaDiaMoto,
+        @PositiveOrZero(message = "La tarifa noche de moto no puede ser negativa")
+        Double tarifaNocheMoto
 ) {
     /** Edición sin tocar los cupos ni la tarifa de motos (la forma que tenía antes de separar carros y motos). */
     public ParqueaderoActualizarDto(String nombre, String direccion, String zona, Integer capacidadTotal,
                                     Double tarifaHora, Double tarifaDia, Double tarifaNoche,
                                     LocalTime horaInicio, LocalTime horaFinal, String nombrePropietario) {
         this(nombre, direccion, zona, capacidadTotal, tarifaHora, tarifaDia, tarifaNoche, horaInicio, horaFinal,
-                nombrePropietario, null, null);
+                nombrePropietario, null, null, null, null);
+    }
+
+    /** Edición sin las tarifas de día y noche de moto (la forma que tenía antes de cobrar por tiempo). */
+    public ParqueaderoActualizarDto(String nombre, String direccion, String zona, Integer capacidadTotal,
+                                    Double tarifaHora, Double tarifaDia, Double tarifaNoche,
+                                    LocalTime horaInicio, LocalTime horaFinal, String nombrePropietario,
+                                    Integer capacidadMotos, Double tarifaHoraMoto) {
+        this(nombre, direccion, zona, capacidadTotal, tarifaHora, tarifaDia, tarifaNoche, horaInicio, horaFinal,
+                nombrePropietario, capacidadMotos, tarifaHoraMoto, null, null);
     }
 }

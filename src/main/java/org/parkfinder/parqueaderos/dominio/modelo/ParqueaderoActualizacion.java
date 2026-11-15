@@ -19,6 +19,8 @@ public class ParqueaderoActualizacion {
     public Integer capacidadTotal;
     public Integer capacidadMotos;
     public Double tarifaHoraMoto;
+    public Double tarifaDiaMoto;
+    public Double tarifaNocheMoto;
     public Double tarifaHora;
     public Double tarifaDia;
     public Double tarifaNoche;

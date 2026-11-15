@@ -27,5 +27,7 @@ public class ParqueaderoConsulta {
     public int capacidadMotos;
     public int cuposMotos;
     public Double tarifaHoraMoto;
+    public Double tarifaDiaMoto;
+    public Double tarifaNocheMoto;
     public Integer adminId;
 }

@@ -55,6 +55,8 @@ public class ParqueaderoRecursos {
                 .cuposDisponibles(parqueaderoDto.capacidadTotal())
                 .capacidadMotos(parqueaderoDto.capacidadMotos())
                 .tarifaHoraMoto(parqueaderoDto.tarifaHoraMoto())
+                .tarifaDiaMoto(parqueaderoDto.tarifaDiaMoto())
+                .tarifaNocheMoto(parqueaderoDto.tarifaNocheMoto())
                 .build();
         try {
             parqueaderoServicio.crearPark(parqueadero);
@@ -93,6 +95,8 @@ public class ParqueaderoRecursos {
                 .capacidadTotal(parqueaderoDto.capacidadTotal())
                 .capacidadMotos(parqueaderoDto.capacidadMotos())
                 .tarifaHoraMoto(parqueaderoDto.tarifaHoraMoto())
+                .tarifaDiaMoto(parqueaderoDto.tarifaDiaMoto())
+                .tarifaNocheMoto(parqueaderoDto.tarifaNocheMoto())
                 .tarifaHora(parqueaderoDto.tarifaHora())
                 .tarifaDia(parqueaderoDto.tarifaDia())
                 .tarifaNoche(parqueaderoDto.tarifaNoche())

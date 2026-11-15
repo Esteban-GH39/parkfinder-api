@@ -36,7 +36,11 @@ public record ParqueaderoDto(
         @Min(value = 0, message = "Los cupos de motos no pueden ser negativos")
         Integer capacidadMotos,
         @PositiveOrZero(message = "La tarifa de moto no puede ser negativa")
-        Double tarifaHoraMoto
+        Double tarifaHoraMoto,
+        @PositiveOrZero(message = "La tarifa día de moto no puede ser negativa")
+        Double tarifaDiaMoto,
+        @PositiveOrZero(message = "La tarifa noche de moto no puede ser negativa")
+        Double tarifaNocheMoto
 
 ) {
 

@@ -28,7 +28,9 @@ public record ParqueaderoConsultaDto(
         int cuposMotos,
         int capacidadCarros,
         int cuposCarros,
-        Double tarifaHoraMoto
+        Double tarifaHoraMoto,
+        Double tarifaDiaMoto,
+        Double tarifaNocheMoto
 ) {
 
     public static ParqueaderoConsultaDto de(ParqueaderoConsulta p) {
@@ -50,6 +52,8 @@ public record ParqueaderoConsultaDto(
                 p.cuposMotos,
                 Math.max(0, p.capacidadTotal - p.capacidadMotos),
                 Math.max(0, p.cuposDisponibles - p.cuposMotos),
-                p.tarifaHoraMoto);
+                p.tarifaHoraMoto,
+                p.tarifaDiaMoto,
+                p.tarifaNocheMoto);
     }
 }

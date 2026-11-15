@@ -42,6 +42,8 @@ public class ParqueaderoPanache implements ParqueaderoRepositorio, PanacheReposi
                 .capacidadMotos(parqueadero.capacidadMotos)
                 .cuposMotos(parqueadero.cuposMotos)
                 .tarifaHoraMoto(parqueadero.tarifaHoraMoto)
+                .tarifaDiaMoto(parqueadero.tarifaDiaMoto)
+                .tarifaNocheMoto(parqueadero.tarifaNocheMoto)
                 .build();
         persist(parqueaderoEntity);
     }
@@ -70,6 +72,10 @@ public class ParqueaderoPanache implements ParqueaderoRepositorio, PanacheReposi
                 datos.capacidadMotos, valor -> entidad.capacidadMotos = valor);
         registrar(cambios, id, "tarifaHoraMoto", entidad.tarifaHoraMoto, datos.tarifaHoraMoto,
                 valor -> entidad.tarifaHoraMoto = valor);
+        registrar(cambios, id, "tarifaDiaMoto", entidad.tarifaDiaMoto, datos.tarifaDiaMoto,
+                valor -> entidad.tarifaDiaMoto = valor);
+        registrar(cambios, id, "tarifaNocheMoto", entidad.tarifaNocheMoto, datos.tarifaNocheMoto,
+                valor -> entidad.tarifaNocheMoto = valor);
         registrar(cambios, id, "tarifaHora", entidad.tarifaHora, datos.tarifaHora,
                 valor -> entidad.tarifaHora = valor);
         registrar(cambios, id, "tarifaDia", entidad.tarifaDia, datos.tarifaDia,
@@ -184,6 +190,8 @@ public class ParqueaderoPanache implements ParqueaderoRepositorio, PanacheReposi
                 .capacidadMotos(entidad.capacidadMotos == null ? 0 : entidad.capacidadMotos)
                 .cuposMotos(entidad.cuposMotos == null ? 0 : entidad.cuposMotos)
                 .tarifaHoraMoto(entidad.tarifaHoraMoto)
+                .tarifaDiaMoto(entidad.tarifaDiaMoto)
+                .tarifaNocheMoto(entidad.tarifaNocheMoto)
                 .adminId(entidad.fk_parqueadero_admin)
                 .build();
     }
@@ -232,6 +240,8 @@ public class ParqueaderoPanache implements ParqueaderoRepositorio, PanacheReposi
                 .capacidadMotos(e.capacidadMotos == null ? 0 : e.capacidadMotos)
                 .cuposMotos(e.cuposMotos == null ? 0 : e.cuposMotos)
                 .tarifaHoraMoto(e.tarifaHoraMoto)
+                .tarifaDiaMoto(e.tarifaDiaMoto)
+                .tarifaNocheMoto(e.tarifaNocheMoto)
                 .build()
         ).toList();
     }
@@ -262,6 +272,8 @@ public class ParqueaderoPanache implements ParqueaderoRepositorio, PanacheReposi
                 .capacidadMotos(entity.capacidadMotos)
                 .cuposMotos(entity.cuposMotos)
                 .tarifaHoraMoto(entity.tarifaHoraMoto)
+                .tarifaDiaMoto(entity.tarifaDiaMoto)
+                .tarifaNocheMoto(entity.tarifaNocheMoto)
                 .build());
     }
 

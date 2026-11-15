@@ -25,6 +25,10 @@ public class Parqueadero {
     public Integer cuposMotos;
     /** Tarifa por hora de la moto; null significa que paga la misma tarifa que el carro. */
     public Double tarifaHoraMoto;
+    /** Tarifa por día de la moto; null significa que paga la misma tarifa que el carro. */
+    public Double tarifaDiaMoto;
+    /** Tarifa por noche de la moto; null significa que paga la misma tarifa que el carro. */
+    public Double tarifaNocheMoto;
 
 
     public int getCapacidadTotal() {
