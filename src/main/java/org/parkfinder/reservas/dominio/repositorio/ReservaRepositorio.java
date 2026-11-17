@@ -30,4 +30,8 @@ public interface ReservaRepositorio {
 
     //METODO LISTAR LAS RESERVAS DE LOS PARQUEADEROS DE UN DUEÑO. Libera antes las retenciones vencidas.
     List<ReservaDetalle> listarPorAdmin(int adminId);
+
+    //METODO LISTAR TODO EL HISTORIAL DE RESERVAS DE UN CLIENTE (cualquier estado), la más reciente primero.
+    //Libera antes las retenciones vencidas para que el estado sea el real.
+    List<ReservaDetalle> listarHistorialPorCliente(Long clienteId);
 }
