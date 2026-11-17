@@ -43,6 +43,19 @@ public class ReservaRecursos {
     }
 
     @GET
+    @Path("/cliente/{clienteId}")
+    @Operation(
+            summary = "Historial de reservas de un cliente",
+            description = "Lista todas las reservas del cliente (pendientes de pago, confirmadas, usadas y vencidas), " +
+                    "la más reciente primero. Incluye el código de reserva cuando ya está pagada."
+    )
+    @APIResponse(responseCode = "200", description = "Historial del cliente (vacío si no tiene reservas)")
+    public Response listarHistorial(@PathParam("clienteId") Long clienteId) {
+        return Response.ok(reservaServicio.listarHistorialPorCliente(clienteId).stream()
+                .map(r -> ReservaDetalleDto.de(r, reservaServicio.costoReserva())).toList()).build();
+    }
+
+    @GET
     @Path("/cliente/{clienteId}/pendientes")
     @Operation(
             summary = "Reservas pendientes de pago de un cliente (HU-07)",

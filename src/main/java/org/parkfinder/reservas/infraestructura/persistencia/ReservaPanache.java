@@ -178,6 +178,38 @@ public class ReservaPanache implements ReservaRepositorio, PanacheRepository<Res
                 }).toList();
     }
 
+    //MÉTODO PARA LISTAR TODO EL HISTORIAL DE RESERVAS DE UN CLIENTE (cualquier estado)
+    @Override
+    @Transactional
+    public List<ReservaDetalle> listarHistorialPorCliente(Long clienteId) {
+        // Se libera lo vencido antes de listar, para que una retención caducada salga como EXPIRADA
+        List<ReservaEntity> retenidas = list("clienteId = ?1 and estado = ?2", clienteId, EstadoReserva.RETENIDA);
+        retenidas.stream().map(r -> r.parqueaderoId).distinct().forEach(parqueaderoId ->
+                liberarVencidas(ParqueaderoEntity.findById(parqueaderoId, LockModeType.PESSIMISTIC_WRITE)));
+
+        return list("clienteId = ?1 order by creadaEn desc", clienteId)
+                .stream().map(r -> {
+                    ParqueaderoEntity parqueadero = ParqueaderoEntity.findById(r.parqueaderoId);
+                    ComprobanteEntity comprobante = ComprobanteEntity.find("reservaId", r.id).firstResult();
+                    return ReservaDetalle
+                            .builder()
+                            .id(r.id)
+                            .parqueaderoId(r.parqueaderoId)
+                            .cantidad(r.cantidad)
+                            .cantidadMotos(r.cantidadMotos)
+                            .codigoReserva(comprobante != null ? comprobante.id : null)
+                            .validadaEn(r.validadaEn)
+                            .parqueaderoNombre(parqueadero != null ? parqueadero.nombre : null)
+                            .tarifaHora(parqueadero != null ? parqueadero.tarifaHora : null)
+                            .tarifaHoraMoto(parqueadero != null ? parqueadero.tarifaHoraMoto : null)
+                            .fechaHoraLlegada(r.fechaHoraLlegada)
+                            .estado(r.estado)
+                            .creadaEn(r.creadaEn)
+                            .expiraEn(r.expiraEn)
+                            .build();
+                }).toList();
+    }
+
     //MÉTODO PARA LISTAR LAS RESERVAS DE LOS PARQUEADEROS DE UN DUEÑO
     @Override
     @Transactional

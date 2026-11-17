@@ -97,6 +97,11 @@ public class ReservaServicio {
         return repositorio.listarPendientesPorCliente(clienteId);
     }
 
+    //MÉTODO LISTAR TODO EL HISTORIAL DE RESERVAS DE UN CLIENTE
+    public List<ReservaDetalle> listarHistorialPorCliente(Long clienteId) {
+        return repositorio.listarHistorialPorCliente(clienteId);
+    }
+
     //MÉTODO LISTAR LAS RESERVAS DE LOS PARQUEADEROS DE UN DUEÑO
     public List<ReservaDetalle> listarPorAdmin(int adminId) {
         return repositorio.listarPorAdmin(adminId);
