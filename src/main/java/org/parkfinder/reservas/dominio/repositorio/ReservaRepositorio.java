@@ -11,6 +11,10 @@ public interface ReservaRepositorio {
     //transacción. Lanza ParqueaderoNoEncontradoException, ReservaInvalidaException o SinCupoException.
     Reserva retenerCupo(Reserva reserva);
 
+    //METODO LIBERAR TODAS LAS RETENCIONES VENCIDAS (HU-11): cada reserva RETENIDA cuyo tiempo se acabó pasa a
+    //EXPIRADA y su cupo vuelve a su parqueadero. Devuelve cuántas liberó.
+    int liberarVencidas();
+
     //METODO CONSULTAR UNA RESERVA (HU-06). Si la retención venció, la marca EXPIRADA y devuelve el cupo.
     Reserva obtenerPorId(Long id);
 
