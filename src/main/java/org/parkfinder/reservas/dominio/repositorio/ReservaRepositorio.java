@@ -3,6 +3,7 @@ package org.parkfinder.reservas.dominio.repositorio;
 import org.parkfinder.reservas.dominio.modelo.Reserva;
 import org.parkfinder.reservas.dominio.modelo.ReservaDetalle;
 
+import java.time.Duration;
 import java.util.List;
 
 public interface ReservaRepositorio {
@@ -20,6 +21,11 @@ public interface ReservaRepositorio {
     //METODO CANCELAR UNA RESERVA RETENIDA (HU-08): pasa a CANCELADA y devuelve sus cupos al parqueadero.
     //Si ya no está retenida no hace nada.
     void cancelar(Long id);
+
+    //METODO CANCELAR UNA RESERVA CONFIRMADA (HU-10): pasa a CANCELADA y devuelve sus cupos. Solo la puede
+    //cancelar su cliente, sin haberse usado el código y hasta [anticipacion] antes de la hora de llegada;
+    //si no, lanza ReservaInvalidaException o ReservaEstadoInvalidoException y no cambia nada.
+    Reserva cancelarConfirmada(Long id, Long clienteId, Duration anticipacion);
 
     //METODO VALIDAR EL CÓDIGO DE RESERVA: el cliente llegó. La reserva sigue CONFIRMADA y queda anotada la
     //hora de validación. Lanza ReservaEstadoInvalidoException si no está confirmada o el código ya se usó.

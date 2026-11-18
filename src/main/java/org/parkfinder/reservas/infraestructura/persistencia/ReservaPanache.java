@@ -19,6 +19,7 @@ import org.parkfinder.reservas.dominio.modelo.ReservaEntity;
 import org.parkfinder.reservas.dominio.modelo.TipoVehiculo;
 import org.parkfinder.reservas.dominio.repositorio.ReservaRepositorio;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -119,6 +120,36 @@ public class ReservaPanache implements ReservaRepositorio, PanacheRepository<Res
             entidad.estado = EstadoReserva.CANCELADA;
             devolverCupos(parqueadero, entidad);
         }
+    }
+
+    //MÉTODO PARA CANCELAR UNA RESERVA CONFIRMADA ANTES DEL TIEMPO LÍMITE (HU-10)
+    @Override
+    @Transactional
+    public Reserva cancelarConfirmada(Long id, Long clienteId, Duration anticipacion) {
+        ReservaEntity entidad = findById(id, LockModeType.PESSIMISTIC_WRITE);
+        if (entidad == null) {
+            throw new ReservaNoEncontradaException(id);
+        }
+        if (!entidad.clienteId.equals(clienteId)) {
+            throw new ReservaInvalidaException("La reserva " + id + " no pertenece al cliente " + clienteId);
+        }
+        if (entidad.estado != EstadoReserva.CONFIRMADA) {
+            throw new ReservaEstadoInvalidoException(
+                    "Solo se puede cancelar una reserva confirmada (estado " + entidad.estado + ")");
+        }
+        if (entidad.validadaEn != null) {
+            throw new ReservaEstadoInvalidoException("La reserva ya se usó: no se puede cancelar");
+        }
+        LocalDateTime limite = entidad.fechaHoraLlegada.minus(anticipacion);
+        if (LocalDateTime.now().isAfter(limite)) {
+            throw new ReservaEstadoInvalidoException("Ya pasó el tiempo límite para cancelar: se puede hasta "
+                    + anticipacion.toMinutes() + " minutos antes de la llegada");
+        }
+        ParqueaderoEntity parqueadero =
+                ParqueaderoEntity.findById(entidad.parqueaderoId, LockModeType.PESSIMISTIC_WRITE);
+        entidad.estado = EstadoReserva.CANCELADA;
+        devolverCupos(parqueadero, entidad);
+        return aDominio(entidad);
     }
 
     //MÉTODO PARA VALIDAR EL CÓDIGO DE RESERVA: se anota la hora; la reserva sigue CONFIRMADA

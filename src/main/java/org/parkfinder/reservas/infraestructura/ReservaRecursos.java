@@ -7,12 +7,14 @@ import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.parkfinder.reservas.aplicacion.ReservaServicio;
+import org.parkfinder.reservas.dominio.excepcion.ReservaInvalidaException;
 import org.parkfinder.reservas.infraestructura.dto.ReservaConsultaDto;
 import org.parkfinder.reservas.infraestructura.dto.ReservaDetalleDto;
 import org.parkfinder.reservas.infraestructura.dto.ReservaDto;
@@ -91,6 +93,24 @@ public class ReservaRecursos {
     @APIResponse(responseCode = "409", description = "La reserva no está confirmada o ya se usó")
     public Response validar(@PathParam("id") Long id) {
         return Response.ok(ReservaConsultaDto.de(reservaServicio.validar(id), reservaServicio.costoReserva())).build();
+    }
+
+    @POST
+    @Path("/{id}/cancelar")
+    @Operation(
+            summary = "Cancelar una reserva confirmada (HU-10)",
+            description = "El cliente cancela su reserva confirmada y el cupo vuelve al parqueadero. Solo se " +
+                    "puede hasta unos minutos antes de la hora de llegada (parkfinder.reserva.cancelacion-minutos-antes)."
+    )
+    @APIResponse(responseCode = "200", description = "Reserva cancelada y cupo liberado")
+    @APIResponse(responseCode = "400", description = "La reserva no es de ese cliente")
+    @APIResponse(responseCode = "404", description = "La reserva no existe")
+    @APIResponse(responseCode = "409", description = "No está confirmada, ya se usó o pasó el tiempo límite")
+    public Response cancelar(@PathParam("id") Long id, @QueryParam("clienteId") Long clienteId) {
+        if (clienteId == null) {
+            throw new ReservaInvalidaException("Falta el clienteId");
+        }
+        return Response.ok(ReservaConsultaDto.de(reservaServicio.cancelar(id, clienteId), reservaServicio.costoReserva())).build();
     }
 
     @GET
