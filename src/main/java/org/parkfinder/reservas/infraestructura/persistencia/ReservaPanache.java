@@ -76,6 +76,28 @@ public class ReservaPanache implements ReservaRepositorio, PanacheRepository<Res
         return aDominio(entidad);
     }
 
+    //MÉTODO PARA LIBERAR LAS RETENCIONES VENCIDAS DE TODOS LOS PARQUEADEROS (HU-11)
+    @Override
+    @Transactional
+    public int liberarVencidas() {
+        List<Long> parqueaderos = getEntityManager()
+                .createQuery("select distinct r.parqueaderoId from ReservaEntity r "
+                        + "where r.estado = ?1 and r.expiraEn < ?2", Long.class)
+                .setParameter(1, EstadoReserva.RETENIDA)
+                .setParameter(2, LocalDateTime.now())
+                .getResultList();
+        int liberadas = 0;
+        for (Long parqueaderoId : parqueaderos) {
+            // Mismo bloqueo que al reservar: no se pelea el cupo con una reserva nueva
+            ParqueaderoEntity parqueadero =
+                    ParqueaderoEntity.findById(parqueaderoId, LockModeType.PESSIMISTIC_WRITE);
+            if (parqueadero != null) {
+                liberadas += liberarVencidas(parqueadero);
+            }
+        }
+        return liberadas;
+    }
+
     //MÉTODO PARA CONSULTAR UNA RESERVA (HU-06)
     @Override
     @Transactional
@@ -299,13 +321,14 @@ public class ReservaPanache implements ReservaRepositorio, PanacheRepository<Res
      * La retención vence sin tarea programada: se libera cuando alguien reserva o consulta.
      * Debe llamarse con la fila del parqueadero ya bloqueada.
      */
-    private void liberarVencidas(ParqueaderoEntity parqueadero) {
+    private int liberarVencidas(ParqueaderoEntity parqueadero) {
         List<ReservaEntity> vencidas = list("parqueaderoId = ?1 and estado = ?2 and expiraEn < ?3",
                 parqueadero.id, EstadoReserva.RETENIDA, LocalDateTime.now());
         for (ReservaEntity vencida : vencidas) {
             vencida.estado = EstadoReserva.EXPIRADA;
             devolverCupos(parqueadero, vencida);
         }
+        return vencidas.size();
     }
 
     /** Devuelve los cupos de la reserva, cada tipo a su contador, sin pasar de la capacidad de ese tipo. */

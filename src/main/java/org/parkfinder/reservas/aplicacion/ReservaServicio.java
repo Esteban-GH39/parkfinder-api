@@ -77,6 +77,11 @@ public class ReservaServicio {
         return repositorio.retenerCupo(reserva);
     }
 
+    //MÉTODO LIBERAR LAS RESERVAS NO PAGADAS CUYA RETENCIÓN VENCIÓ y devolver sus cupos (HU-11)
+    public int liberarVencidas() {
+        return repositorio.liberarVencidas();
+    }
+
     //MÉTODO CONSULTAR UNA RESERVA (HU-06)
     public Reserva obtenerPorId(Long id) {
         return repositorio.obtenerPorId(id);
