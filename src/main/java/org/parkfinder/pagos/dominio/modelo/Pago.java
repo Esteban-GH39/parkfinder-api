@@ -17,4 +17,8 @@ public class Pago {
     public LocalDateTime creadoEn;
     /** Código de reserva: id del comprobante generado al aprobarse. No se guarda en el pago. */
     public Long comprobanteId;
+    /** Intentos que le quedan a la reserva tras un rechazo (HU-08). No se guarda en el pago. */
+    public Integer intentosRestantes;
+    /** true si este rechazo agotó los intentos y la reserva se canceló liberando el cupo (HU-08). */
+    public boolean reservaCancelada;
 }

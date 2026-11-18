@@ -45,7 +45,12 @@ public class PagoServicio {
     @ConfigProperty(name = "parkfinder.pago.costo-reserva", defaultValue = "3000")
     double costoReserva;
 
-    //MÉTODO PAGAR UNA RESERVA RETENIDA (HU-07). Un rechazo también se guarda y no impide reintentar.
+    /** Rechazos que tolera una reserva: al llegar a este número se cancela y el cupo se libera (HU-08). */
+    @ConfigProperty(name = "parkfinder.pago.max-intentos", defaultValue = "3")
+    int maxIntentos;
+
+    //MÉTODO PAGAR UNA RESERVA RETENIDA (HU-07). Un rechazo también se guarda y permite reintentar hasta
+    //agotar los intentos (HU-08): entonces la reserva se cancela y el cupo vuelve al parqueadero.
     //Si se aprueba, la reserva queda confirmada y se genera su comprobante: su id es el código de reserva.
     //Todo en una sola transacción: si algo falla no queda un pago aprobado sin reserva confirmada ni código.
     @Transactional
@@ -88,6 +93,13 @@ public class PagoServicio {
                     .reservaId(reservaId)
                     .build());
             pago.comprobanteId = comprobante.idComprobante;
+        } else {
+            long restantes = maxIntentos - repositorio.contarRechazados(reservaId);
+            pago.intentosRestantes = (int) Math.max(0, restantes);
+            if (restantes <= 0) {
+                reservaRepositorio.cancelar(reservaId);
+                pago.reservaCancelada = true;
+            }
         }
         return pago;
     }

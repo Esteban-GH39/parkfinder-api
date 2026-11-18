@@ -17,6 +17,10 @@ public interface ReservaRepositorio {
     //METODO CONFIRMAR UNA RESERVA RETENIDA CUANDO SU PAGO FUE APROBADO (el cupo ya estaba descontado)
     void confirmar(Long id);
 
+    //METODO CANCELAR UNA RESERVA RETENIDA (HU-08): pasa a CANCELADA y devuelve sus cupos al parqueadero.
+    //Si ya no está retenida no hace nada.
+    void cancelar(Long id);
+
     //METODO VALIDAR EL CÓDIGO DE RESERVA: el cliente llegó. La reserva sigue CONFIRMADA y queda anotada la
     //hora de validación. Lanza ReservaEstadoInvalidoException si no está confirmada o el código ya se usó.
     Reserva validar(Long id);

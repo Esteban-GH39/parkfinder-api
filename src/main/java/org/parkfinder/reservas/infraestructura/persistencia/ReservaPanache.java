@@ -105,6 +105,22 @@ public class ReservaPanache implements ReservaRepositorio, PanacheRepository<Res
         }
     }
 
+    //MÉTODO PARA CANCELAR UNA RESERVA RETENIDA Y DEVOLVER SUS CUPOS (HU-08)
+    @Override
+    @Transactional
+    public void cancelar(Long id) {
+        ReservaEntity entidad = findById(id, LockModeType.PESSIMISTIC_WRITE);
+        if (entidad == null) {
+            throw new ReservaNoEncontradaException(id);
+        }
+        if (entidad.estado == EstadoReserva.RETENIDA) {
+            ParqueaderoEntity parqueadero =
+                    ParqueaderoEntity.findById(entidad.parqueaderoId, LockModeType.PESSIMISTIC_WRITE);
+            entidad.estado = EstadoReserva.CANCELADA;
+            devolverCupos(parqueadero, entidad);
+        }
+    }
+
     //MÉTODO PARA VALIDAR EL CÓDIGO DE RESERVA: se anota la hora; la reserva sigue CONFIRMADA
     @Override
     @Transactional
