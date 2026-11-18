@@ -7,6 +7,9 @@ public interface PagoRepositorio {
     //METODO GUARDAR EL RESULTADO DE UN PAGO (HU-07), aprobado o rechazado
     Pago guardar(Pago pago);
 
+    //METODO CONTAR LOS PAGOS RECHAZADOS DE UNA RESERVA (HU-08)
+    long contarRechazados(Long reservaId);
+
     //METODO SABER SI LA RESERVA YA TIENE UN PAGO APROBADO
     boolean existeAprobado(Long reservaId);
 }

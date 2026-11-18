@@ -19,6 +19,7 @@ import org.parkfinder.reservas.dominio.modelo.ReservaEntity;
 import org.parkfinder.reservas.dominio.modelo.TipoVehiculo;
 import org.parkfinder.reservas.dominio.repositorio.ReservaRepositorio;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -75,6 +76,28 @@ public class ReservaPanache implements ReservaRepositorio, PanacheRepository<Res
         return aDominio(entidad);
     }
 
+    //MÉTODO PARA LIBERAR LAS RETENCIONES VENCIDAS DE TODOS LOS PARQUEADEROS (HU-11)
+    @Override
+    @Transactional
+    public int liberarVencidas() {
+        List<Long> parqueaderos = getEntityManager()
+                .createQuery("select distinct r.parqueaderoId from ReservaEntity r "
+                        + "where r.estado = ?1 and r.expiraEn < ?2", Long.class)
+                .setParameter(1, EstadoReserva.RETENIDA)
+                .setParameter(2, LocalDateTime.now())
+                .getResultList();
+        int liberadas = 0;
+        for (Long parqueaderoId : parqueaderos) {
+            // Mismo bloqueo que al reservar: no se pelea el cupo con una reserva nueva
+            ParqueaderoEntity parqueadero =
+                    ParqueaderoEntity.findById(parqueaderoId, LockModeType.PESSIMISTIC_WRITE);
+            if (parqueadero != null) {
+                liberadas += liberarVencidas(parqueadero);
+            }
+        }
+        return liberadas;
+    }
+
     //MÉTODO PARA CONSULTAR UNA RESERVA (HU-06)
     @Override
     @Transactional
@@ -103,6 +126,52 @@ public class ReservaPanache implements ReservaRepositorio, PanacheRepository<Res
         if (entidad.estado == EstadoReserva.RETENIDA) {
             entidad.estado = EstadoReserva.CONFIRMADA;
         }
+    }
+
+    //MÉTODO PARA CANCELAR UNA RESERVA RETENIDA Y DEVOLVER SUS CUPOS (HU-08)
+    @Override
+    @Transactional
+    public void cancelar(Long id) {
+        ReservaEntity entidad = findById(id, LockModeType.PESSIMISTIC_WRITE);
+        if (entidad == null) {
+            throw new ReservaNoEncontradaException(id);
+        }
+        if (entidad.estado == EstadoReserva.RETENIDA) {
+            ParqueaderoEntity parqueadero =
+                    ParqueaderoEntity.findById(entidad.parqueaderoId, LockModeType.PESSIMISTIC_WRITE);
+            entidad.estado = EstadoReserva.CANCELADA;
+            devolverCupos(parqueadero, entidad);
+        }
+    }
+
+    //MÉTODO PARA CANCELAR UNA RESERVA CONFIRMADA ANTES DEL TIEMPO LÍMITE (HU-10)
+    @Override
+    @Transactional
+    public Reserva cancelarConfirmada(Long id, Long clienteId, Duration anticipacion) {
+        ReservaEntity entidad = findById(id, LockModeType.PESSIMISTIC_WRITE);
+        if (entidad == null) {
+            throw new ReservaNoEncontradaException(id);
+        }
+        if (!entidad.clienteId.equals(clienteId)) {
+            throw new ReservaInvalidaException("La reserva " + id + " no pertenece al cliente " + clienteId);
+        }
+        if (entidad.estado != EstadoReserva.CONFIRMADA) {
+            throw new ReservaEstadoInvalidoException(
+                    "Solo se puede cancelar una reserva confirmada (estado " + entidad.estado + ")");
+        }
+        if (entidad.validadaEn != null) {
+            throw new ReservaEstadoInvalidoException("La reserva ya se usó: no se puede cancelar");
+        }
+        LocalDateTime limite = entidad.fechaHoraLlegada.minus(anticipacion);
+        if (LocalDateTime.now().isAfter(limite)) {
+            throw new ReservaEstadoInvalidoException("Ya pasó el tiempo límite para cancelar: se puede hasta "
+                    + anticipacion.toMinutes() + " minutos antes de la llegada");
+        }
+        ParqueaderoEntity parqueadero =
+                ParqueaderoEntity.findById(entidad.parqueaderoId, LockModeType.PESSIMISTIC_WRITE);
+        entidad.estado = EstadoReserva.CANCELADA;
+        devolverCupos(parqueadero, entidad);
+        return aDominio(entidad);
     }
 
     //MÉTODO PARA VALIDAR EL CÓDIGO DE RESERVA: se anota la hora; la reserva sigue CONFIRMADA
@@ -252,13 +321,14 @@ public class ReservaPanache implements ReservaRepositorio, PanacheRepository<Res
      * La retención vence sin tarea programada: se libera cuando alguien reserva o consulta.
      * Debe llamarse con la fila del parqueadero ya bloqueada.
      */
-    private void liberarVencidas(ParqueaderoEntity parqueadero) {
+    private int liberarVencidas(ParqueaderoEntity parqueadero) {
         List<ReservaEntity> vencidas = list("parqueaderoId = ?1 and estado = ?2 and expiraEn < ?3",
                 parqueadero.id, EstadoReserva.RETENIDA, LocalDateTime.now());
         for (ReservaEntity vencida : vencidas) {
             vencida.estado = EstadoReserva.EXPIRADA;
             devolverCupos(parqueadero, vencida);
         }
+        return vencidas.size();
     }
 
     /** Devuelve los cupos de la reserva, cada tipo a su contador, sin pasar de la capacidad de ese tipo. */

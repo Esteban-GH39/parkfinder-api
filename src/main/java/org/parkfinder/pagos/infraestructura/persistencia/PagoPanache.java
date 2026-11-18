@@ -32,6 +32,11 @@ public class PagoPanache implements PagoRepositorio, PanacheRepository<PagoEntit
     }
 
     @Override
+    public long contarRechazados(Long reservaId) {
+        return count("reservaId = ?1 and estado = ?2", reservaId, EstadoPago.RECHAZADO);
+    }
+
+    @Override
     public boolean existeAprobado(Long reservaId) {
         return count("reservaId = ?1 and estado = ?2", reservaId, EstadoPago.APROBADO) > 0;
     }

@@ -11,6 +11,7 @@ import org.parkfinder.reservas.dominio.modelo.Reserva;
 import org.parkfinder.reservas.dominio.modelo.ReservaDetalle;
 import org.parkfinder.reservas.dominio.repositorio.ReservaRepositorio;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
@@ -29,6 +30,10 @@ public class ReservaServicio {
 
     @ConfigProperty(name = "parkfinder.pago.costo-reserva", defaultValue = "3000")
     double costoReserva;
+
+    /** Hasta cuántos minutos antes de la llegada puede el cliente cancelar una reserva confirmada (HU-10). */
+    @ConfigProperty(name = "parkfinder.reserva.cancelacion-minutos-antes", defaultValue = "60")
+    long cancelacionMinutosAntes;
 
     //MÉTODO RESERVAR UN CUPO DE CARRO (HU-06)
     public Reserva reservar(Long clienteId, Long parqueaderoId, LocalDateTime fechaHoraLlegada) {
@@ -72,9 +77,19 @@ public class ReservaServicio {
         return repositorio.retenerCupo(reserva);
     }
 
+    //MÉTODO LIBERAR LAS RESERVAS NO PAGADAS CUYA RETENCIÓN VENCIÓ y devolver sus cupos (HU-11)
+    public int liberarVencidas() {
+        return repositorio.liberarVencidas();
+    }
+
     //MÉTODO CONSULTAR UNA RESERVA (HU-06)
     public Reserva obtenerPorId(Long id) {
         return repositorio.obtenerPorId(id);
+    }
+
+    //MÉTODO CANCELAR UNA RESERVA CONFIRMADA ANTES DEL TIEMPO LÍMITE y liberar el cupo (HU-10)
+    public Reserva cancelar(Long id, Long clienteId) {
+        return repositorio.cancelarConfirmada(id, clienteId, Duration.ofMinutes(cancelacionMinutosAntes));
     }
 
     //MÉTODO VALIDAR EL CÓDIGO DE RESERVA: el cliente llegó (se anota la hora; sigue CONFIRMADA)
