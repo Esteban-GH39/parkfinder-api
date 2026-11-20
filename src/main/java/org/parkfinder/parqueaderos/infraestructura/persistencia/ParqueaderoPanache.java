@@ -4,6 +4,7 @@ import io.quarkus.hibernate.orm.panache.PanacheRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import org.parkfinder.parqueaderos.dominio.excepcion.ParqueaderoNoEncontradoException;
+import org.parkfinder.parqueaderos.dominio.modelo.AjusteCupos;
 import org.parkfinder.parqueaderos.dominio.modelo.HistorialCambio;
 import org.parkfinder.parqueaderos.dominio.modelo.HistorialCambioEntity;
 import org.parkfinder.parqueaderos.dominio.modelo.Parqueadero;
@@ -58,6 +59,7 @@ public class ParqueaderoPanache implements ParqueaderoRepositorio, PanacheReposi
         }
 
         int motosAntes = entidad.capacidadMotos == null ? 0 : entidad.capacidadMotos;
+        int capacidadAntes = entidad.capacidadTotal;
 
         List<HistorialCambio> cambios = new ArrayList<>();
         registrar(cambios, id, "nombre", entidad.nombre, datos.nombre,
@@ -90,12 +92,15 @@ public class ParqueaderoPanache implements ParqueaderoRepositorio, PanacheReposi
                 valor -> entidad.nombrePropietario = valor);
 
         int motos = entidad.capacidadMotos == null ? 0 : entidad.capacidadMotos;
-        // Si cambió la capacidad de motos, sus cupos libres (y el total libre) se mueven lo mismo
-        int diferencia = motos - motosAntes;
-        if (diferencia != 0) {
+        // Si cambió la capacidad de motos, sus cupos libres se mueven lo mismo
+        if (motos != motosAntes) {
             int cuposMotos = entidad.cuposMotos == null ? 0 : entidad.cuposMotos;
-            entidad.cuposMotos = Math.max(0, Math.min(motos, cuposMotos + diferencia));
-            entidad.cuposDisponibles = Math.max(0, Math.min(entidad.capacidadTotal, entidad.cuposDisponibles + diferencia));
+            entidad.cuposMotos = AjusteCupos.disponibles(cuposMotos, motosAntes, motos);
+        }
+        // Igual con el total (carros + motos): la ocupación no se edita, se conserva
+        if (entidad.capacidadTotal != capacidadAntes) {
+            entidad.cuposDisponibles = AjusteCupos.disponibles(
+                    entidad.cuposDisponibles, capacidadAntes, entidad.capacidadTotal);
         }
         if (motos > entidad.capacidadTotal) {
             // Al lanzar, la transacción se revierte y no queda nada guardado

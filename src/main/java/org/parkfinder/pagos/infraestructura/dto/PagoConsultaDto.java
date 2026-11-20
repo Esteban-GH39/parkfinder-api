@@ -16,10 +16,13 @@ public record PagoConsultaDto(
         String detalle,
         String mensaje,
         LocalDateTime creadoEn,
-        Long codigoReserva
+        Long codigoReserva,
+        Integer intentosRestantes,
+        boolean reservaCancelada
 ) {
     public static PagoConsultaDto de(Pago pago) {
         return new PagoConsultaDto(pago.id, pago.reservaId, pago.medioPago, pago.monto, pago.estado,
-                pago.referencia, pago.detalle, pago.mensaje, pago.creadoEn, pago.comprobanteId);
+                pago.referencia, pago.detalle, pago.mensaje, pago.creadoEn, pago.comprobanteId,
+                pago.intentosRestantes, pago.reservaCancelada);
     }
 }
