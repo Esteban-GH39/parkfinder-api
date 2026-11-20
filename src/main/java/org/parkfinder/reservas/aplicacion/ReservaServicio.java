@@ -2,7 +2,9 @@ package org.parkfinder.reservas.aplicacion;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.parkfinder.billetera.aplicacion.BilleteraServicio;
 import org.parkfinder.parqueaderos.dominio.modelo.ParqueaderoConsulta;
 import org.parkfinder.parqueaderos.dominio.repositorio.ParqueaderoRepositorio;
 import org.parkfinder.reservas.dominio.excepcion.ReservaInvalidaException;
@@ -25,6 +27,9 @@ public class ReservaServicio {
     @Inject
     ParqueaderoRepositorio parqueaderoRepositorio;
 
+    @Inject
+    BilleteraServicio billetera;
+
     @ConfigProperty(name = "parkfinder.reserva.retencion-minutos", defaultValue = "10")
     long retencionMinutos;
 
@@ -34,6 +39,10 @@ public class ReservaServicio {
     /** Hasta cuántos minutos antes de la llegada puede el cliente cancelar una reserva confirmada (HU-10). */
     @ConfigProperty(name = "parkfinder.reserva.cancelacion-minutos-antes", defaultValue = "60")
     long cancelacionMinutosAntes;
+
+    /** Si es true, al cancelar una reserva confirmada su costo vuelve al saldo de la billetera del cliente. */
+    @ConfigProperty(name = "parkfinder.reserva.reembolsar-al-cancelar", defaultValue = "true")
+    boolean reembolsarAlCancelar;
 
     //MÉTODO RESERVAR UN CUPO DE CARRO (HU-06)
     public Reserva reservar(Long clienteId, Long parqueaderoId, LocalDateTime fechaHoraLlegada) {
@@ -88,8 +97,19 @@ public class ReservaServicio {
     }
 
     //MÉTODO CANCELAR UNA RESERVA CONFIRMADA ANTES DEL TIEMPO LÍMITE y liberar el cupo (HU-10)
+    //El reembolso va en la misma transacción: no puede quedar una reserva cancelada sin su devolución.
+    @Transactional
     public Reserva cancelar(Long id, Long clienteId) {
-        return repositorio.cancelarConfirmada(id, clienteId, Duration.ofMinutes(cancelacionMinutosAntes));
+        Reserva cancelada = repositorio.cancelarConfirmada(id, clienteId, Duration.ofMinutes(cancelacionMinutosAntes));
+        if (reembolsarAlCancelar) {
+            billetera.reembolsarReserva(clienteId, id, Math.round(costoReserva));
+        }
+        return cancelada;
+    }
+
+    //MÉTODO SABER SI AL CANCELAR SE DEVUELVE EL COSTO AL SALDO (lo usa el recurso para avisarle al cliente)
+    public boolean reembolsaAlCancelar() {
+        return reembolsarAlCancelar;
     }
 
     //MÉTODO VALIDAR EL CÓDIGO DE RESERVA: el cliente llegó (se anota la hora; sigue CONFIRMADA)

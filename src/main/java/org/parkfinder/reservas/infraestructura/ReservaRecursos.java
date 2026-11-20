@@ -100,7 +100,9 @@ public class ReservaRecursos {
     @Operation(
             summary = "Cancelar una reserva confirmada (HU-10)",
             description = "El cliente cancela su reserva confirmada y el cupo vuelve al parqueadero. Solo se " +
-                    "puede hasta unos minutos antes de la hora de llegada (parkfinder.reserva.cancelacion-minutos-antes)."
+                    "puede hasta unos minutos antes de la hora de llegada (parkfinder.reserva.cancelacion-minutos-antes). " +
+                    "Si parkfinder.reserva.reembolsar-al-cancelar está activo, el costo vuelve al saldo de la billetera " +
+                    "y la respuesta trae la cabecera X-Reembolso con los pesos devueltos."
     )
     @APIResponse(responseCode = "200", description = "Reserva cancelada y cupo liberado")
     @APIResponse(responseCode = "400", description = "La reserva no es de ese cliente")
@@ -110,7 +112,13 @@ public class ReservaRecursos {
         if (clienteId == null) {
             throw new ReservaInvalidaException("Falta el clienteId");
         }
-        return Response.ok(ReservaConsultaDto.de(reservaServicio.cancelar(id, clienteId), reservaServicio.costoReserva())).build();
+        var respuesta = Response.ok(
+                ReservaConsultaDto.de(reservaServicio.cancelar(id, clienteId), reservaServicio.costoReserva()));
+        // Cuánto volvió al saldo de la billetera, para que la app se lo muestre al cliente.
+        if (reservaServicio.reembolsaAlCancelar()) {
+            respuesta.header("X-Reembolso", Math.round(reservaServicio.costoReserva()));
+        }
+        return respuesta.build();
     }
 
     @GET

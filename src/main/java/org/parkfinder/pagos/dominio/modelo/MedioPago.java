@@ -6,7 +6,9 @@ import java.util.List;
 public enum MedioPago {
     TARJETA("Tarjeta", List.of("numeroTarjeta", "titular", "vencimiento", "cvv")),
     PSE("PSE", List.of("banco", "documento")),
-    NEQUI("Nequi", List.of("celular"));
+    NEQUI("Nequi", List.of("celular")),
+    /** Paga con el saldo de la billetera del cliente: no pasa por la pasarela ni pide datos. Solo sirve para pagar reservas, no para recargar. */
+    SALDO("Saldo", List.of());
 
     public final String etiqueta;
     public final List<String> camposRequeridos;
