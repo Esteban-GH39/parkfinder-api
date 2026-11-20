@@ -38,6 +38,7 @@ public class PasarelaSimulada implements PasarelaPago {
             }
             case PSE -> "PSE - " + datos.get("banco").trim();
             case NEQUI -> "Nequi - " + datos.get("celular").trim();
+            case SALDO -> "Saldo ParkFinder";
         };
     }
 

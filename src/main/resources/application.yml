@@ -5,14 +5,15 @@ quarkus:
 
   # HTTP
   http:
-    port: 8860
-    host: localhost
+    port: ${PORT:8860} # Antes tenia: 8860
+    host: 0.0.0.0 # Antes tenia: localhost
     root-path: /kick # Todo tus endpoints tendrán el prefijo /kick (ej: http://localhost:8860/kick/api)
 
     cors:
       origins: "/.*/"
       methods: "GET,POST,PUT,DELETE,PATCH,OPTIONS"
       headers: "Content-Type,Authorization,X-Requested-With"
+      exposed-headers: "X-Reembolso"
 
 
   # Base de datos

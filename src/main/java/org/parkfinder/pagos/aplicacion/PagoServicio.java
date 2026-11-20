@@ -4,6 +4,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.parkfinder.billetera.aplicacion.BilleteraServicio;
 import org.parkfinder.comprobante.aplicacion.ComprobanteServicio;
 import org.parkfinder.comprobante.dominio.modelo.Comprobante;
 import org.parkfinder.pagos.dominio.excepcion.PagoInvalidoException;
@@ -19,15 +20,11 @@ import org.parkfinder.reservas.dominio.repositorio.ReservaRepositorio;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.YearMonth;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.UUID;
 
 @ApplicationScoped
 public class PagoServicio {
-
-    private static final Pattern VENCIMIENTO = Pattern.compile("^(0[1-9]|1[0-2])/(\\d{2})$");
 
     @Inject
     PagoRepositorio repositorio;
@@ -41,11 +38,19 @@ public class PagoServicio {
     @Inject
     PasarelaPago pasarela;
 
+    @Inject
+    BilleteraServicio billetera;
+
     /** Lo que cuesta cada reserva, sin importar cuántos cupos ni de qué tipo. */
     @ConfigProperty(name = "parkfinder.pago.costo-reserva", defaultValue = "3000")
     double costoReserva;
 
-    //MÉTODO PAGAR UNA RESERVA RETENIDA (HU-07). Un rechazo también se guarda y no impide reintentar.
+    /** Rechazos que tolera una reserva: al llegar a este número se cancela y el cupo se libera (HU-08). */
+    @ConfigProperty(name = "parkfinder.pago.max-intentos", defaultValue = "3")
+    int maxIntentos;
+
+    //MÉTODO PAGAR UNA RESERVA RETENIDA (HU-07). Un rechazo también se guarda y permite reintentar hasta
+    //agotar los intentos (HU-08): entonces la reserva se cancela y el cupo vuelve al parqueadero.
     //Si se aprueba, la reserva queda confirmada y se genera su comprobante: su id es el código de reserva.
     //Todo en una sola transacción: si algo falla no queda un pago aprobado sin reserva confirmada ni código.
     @Transactional
@@ -62,7 +67,11 @@ public class PagoServicio {
             throw new PagoNoPermitidoException("La reserva ya tiene un pago aprobado");
         }
 
-        PasarelaPago.Resultado resultado = pasarela.procesar(medio, recibidos, costoReserva);
+        // Con saldo no hay pasarela: se descuenta de la billetera. Si no alcanza, lanza SaldoInsuficienteException
+        // (409) y no se guarda ningún pago, así que no cuenta como intento rechazado (HU-08).
+        PasarelaPago.Resultado resultado = medio == MedioPago.SALDO
+                ? cobrarDelSaldo(reserva)
+                : pasarela.procesar(medio, recibidos, costoReserva);
         Pago pago = repositorio.guardar(Pago
                 .builder()
                 .reservaId(reservaId)
@@ -88,53 +97,25 @@ public class PagoServicio {
                     .reservaId(reservaId)
                     .build());
             pago.comprobanteId = comprobante.idComprobante;
+        } else {
+            long restantes = maxIntentos - repositorio.contarRechazados(reservaId);
+            pago.intentosRestantes = (int) Math.max(0, restantes);
+            if (restantes <= 0) {
+                reservaRepositorio.cancelar(reservaId);
+                pago.reservaCancelada = true;
+            }
         }
         return pago;
     }
 
-    /** Valida el formato de los datos de cada medio; cualquier dato con buen formato se acepta. */
+    private PasarelaPago.Resultado cobrarDelSaldo(Reserva reserva) {
+        String referencia = "SALDO-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+        billetera.cobrarReserva(reserva.clienteId, reserva.id, Math.round(costoReserva), referencia);
+        return new PasarelaPago.Resultado(EstadoPago.APROBADO, referencia, "Saldo ParkFinder",
+                "Pago aprobado con saldo");
+    }
+
     private void validarDatos(MedioPago medio, Map<String, String> datos) {
-        for (String campo : medio.camposRequeridos) {
-            String valor = datos.get(campo);
-            if (valor == null || valor.isBlank()) {
-                throw new PagoInvalidoException("Falta el dato '" + campo + "' para pagar con " + medio.etiqueta);
-            }
-        }
-        switch (medio) {
-            case TARJETA -> {
-                if (!soloDigitos(datos.get("numeroTarjeta")).matches("\\d{16}")) {
-                    throw new PagoInvalidoException("El número de la tarjeta debe tener 16 dígitos");
-                }
-                validarVencimiento(datos.get("vencimiento").trim());
-                if (!datos.get("cvv").trim().matches("\\d{3,4}")) {
-                    throw new PagoInvalidoException("El CVV debe tener 3 o 4 dígitos");
-                }
-            }
-            case PSE -> {
-                if (!datos.get("documento").trim().matches("\\d{6,10}")) {
-                    throw new PagoInvalidoException("El documento debe tener entre 6 y 10 dígitos");
-                }
-            }
-            case NEQUI -> {
-                if (!datos.get("celular").trim().matches("3\\d{9}")) {
-                    throw new PagoInvalidoException("El celular debe tener 10 dígitos y empezar por 3");
-                }
-            }
-        }
-    }
-
-    private void validarVencimiento(String vencimiento) {
-        Matcher m = VENCIMIENTO.matcher(vencimiento);
-        if (!m.matches()) {
-            throw new PagoInvalidoException("El vencimiento debe tener el formato MM/AA");
-        }
-        YearMonth vence = YearMonth.of(2000 + Integer.parseInt(m.group(2)), Integer.parseInt(m.group(1)));
-        if (vence.isBefore(YearMonth.now())) {
-            throw new PagoInvalidoException("La tarjeta está vencida");
-        }
-    }
-
-    private static String soloDigitos(String texto) {
-        return texto.replaceAll("[\\s-]", "");
+        ValidadorMedioPago.validar(medio, datos);
     }
 }

@@ -30,4 +30,29 @@ public class ClienteServicio {
         boolean coincide = BcryptUtil.matches(contrasena, hash);
         return cliente.filter(c -> coincide);
     }
+
+    /** Perfil de la cuenta; vacío si no existe. */
+    public Optional<Cliente> obtenerPerfil(Long id) {
+        return repositorio.buscarPorId(id);
+    }
+
+    /** Cambia nombre (y teléfono si es dueño). Vacío si la cuenta no existe. */
+    public Optional<Cliente> actualizarPerfil(Long id, String nombre, Long telefono) {
+        return repositorio.actualizarPerfil(id, nombre.trim(), telefono);
+    }
+
+    public enum ResultadoCambioContrasena { CAMBIADA, NO_EXISTE, CONTRASENA_INCORRECTA }
+
+    /** Exige la contraseña actual: así una sesión abierta y olvidada no basta para quedarse con la cuenta. */
+    public ResultadoCambioContrasena cambiarContrasena(Long id, String contrasenaActual, String contrasenaNueva) {
+        Optional<Cliente> cliente = repositorio.buscarPorId(id);
+        if (cliente.isEmpty()) {
+            return ResultadoCambioContrasena.NO_EXISTE;
+        }
+        if (!BcryptUtil.matches(contrasenaActual, cliente.get().contrasenaHash)) {
+            return ResultadoCambioContrasena.CONTRASENA_INCORRECTA;
+        }
+        repositorio.actualizarContrasena(id, BcryptUtil.bcryptHash(contrasenaNueva));
+        return ResultadoCambioContrasena.CAMBIADA;
+    }
 }

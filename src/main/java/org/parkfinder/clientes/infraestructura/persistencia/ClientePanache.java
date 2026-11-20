@@ -7,6 +7,7 @@ import org.parkfinder.clientes.dominio.modelo.Cliente;
 import org.parkfinder.clientes.dominio.modelo.ClienteEntity;
 import org.parkfinder.clientes.dominio.repositorio.ClienteRepositorio;
 
+import java.util.List;
 import java.util.Optional;
 
 @ApplicationScoped
@@ -61,5 +62,69 @@ public class ClientePanache implements ClienteRepositorio, PanacheRepository<Cli
                         .rol(e.rol != null ? e.rol : Cliente.ROL_CLIENTE)
                         .adminId(e.adminId)
                         .build());
+    }
+
+    @Override
+    public Optional<Cliente> buscarPorId(Long id) {
+        ClienteEntity e = findById(id);
+        return Optional.ofNullable(e).map(this::aPerfil);
+    }
+
+    @Override
+    @Transactional
+    public Optional<Cliente> actualizarPerfil(Long id, String nombre, Long telefono) {
+        ClienteEntity e = findById(id);
+        if (e == null) {
+            return Optional.empty();
+        }
+        e.nombre = nombre;
+        // Un dueño también tiene su fila en ADMIN: se mantiene alineada con la cuenta.
+        if (Cliente.ROL_ADMIN.equals(e.rol) && e.adminId != null) {
+            getEntityManager()
+                    .createNativeQuery("update admin set nombre = ?1, telefono = coalesce(?2, telefono) where id = ?3")
+                    .setParameter(1, nombre)
+                    .setParameter(2, telefono)
+                    .setParameter(3, e.adminId)
+                    .executeUpdate();
+        }
+        return Optional.of(aPerfil(e));
+    }
+
+    @Override
+    @Transactional
+    public boolean actualizarContrasena(Long id, String nuevoHash) {
+        ClienteEntity e = findById(id);
+        if (e == null) {
+            return false;
+        }
+        e.contrasenaHash = nuevoHash;
+        return true;
+    }
+
+    // Arma el perfil; teléfono y cédula solo existen para los dueños (tabla ADMIN).
+    private Cliente aPerfil(ClienteEntity e) {
+        Long telefono = null;
+        Long cedula = null;
+        if (Cliente.ROL_ADMIN.equals(e.rol) && e.adminId != null) {
+            List<?> filas = getEntityManager()
+                    .createNativeQuery("select telefono, cedula from admin where id = ?1")
+                    .setParameter(1, e.adminId)
+                    .getResultList();
+            if (!filas.isEmpty()) {
+                Object[] fila = (Object[]) filas.get(0);
+                telefono = fila[0] == null ? null : ((Number) fila[0]).longValue();
+                cedula = fila[1] == null ? null : ((Number) fila[1]).longValue();
+            }
+        }
+        return Cliente.builder()
+                .id(e.id)
+                .nombre(e.nombre)
+                .correo(e.correo)
+                .contrasenaHash(e.contrasenaHash)
+                .rol(e.rol != null ? e.rol : Cliente.ROL_CLIENTE)
+                .adminId(e.adminId)
+                .telefono(telefono)
+                .cedula(cedula)
+                .build();
     }
 }
